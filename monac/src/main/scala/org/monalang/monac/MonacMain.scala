@@ -2,10 +2,14 @@ package org.monalang.monac
 
 import org.monalang.monac.iface.CompileOptions
 import org.monalang.monac.iface.OptionName
+import org.monalang.monac.front.Lexer
+import java.io.FileReader
+import java.io.BufferedReader
+import org.monalang.monac.front.Parser
 
 object MonacMain extends App {
   val configuration = CompileOptions(args.toList)
-  println("sources: " + configuration.sources)
-  println("objects: " + configuration.objects)
-  println("output: " + configuration.get(OptionName.OUTPUT))
+  val lexer = new Lexer(new BufferedReader(
+    new FileReader("/home/jan/Projects/Mona/monac-run/hello.mona")))
+  val parser = new Parser(lexer.tokenStream)
 }
