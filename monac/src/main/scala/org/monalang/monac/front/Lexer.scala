@@ -1,41 +1,74 @@
 package org.monalang.monac.front
 
 import java.io.BufferedReader
+import org.monalang.monac.common.util.CharUtil
 
-class Lexer(inputStream: BufferedReader) {
-  // several different regexps can lead to the same token class being created
-  // e.g. "[aZ]*" -> Literal, """ """ -> Literal (scanned differently, but have
-  // the same internal representation
+class Lexer(inputStream : BufferedReader) {
+  private var rows = 0
+  private var columns = 0
+    
+  // token construction functions
 
-  private def getNextToken(): Token = {
-    new Numerical(new Lexeme("123", (0, 0)))
+  private def identifierMatched(lexeme : Lexeme): Token = {
+    new Identifier(lexeme)
   }
-
-  def tokenStream = Stream.continually(getNextToken)
-}
-
-object Lexer {
-  // Conversions
-  // TODO handle different formats
+  
+  /**
+   * A map of finite state automatons constructed from regular expressions that
+   * analyze the input and identify a corresponding token construction function.
+   */
+  private val recognizers = Map(FSA("a") -> identifierMatched _)
 
   /**
-   * Implements the conversion between Mona numerical lexeme format to internal
-   * compiler representation (BigInt).
-   *
-   * Restrictions are imposed later by machine-specific code generation phase.
+   * Returns the next token from the inputStream.
+   * 
+   * On match calls the appropriate token-generating function with the lexeme as
+   * the only argument.
    */
-  def lexemeToNumerical(lexemeData: String): BigInt = BigInt(lexemeData)
+  private def getNextToken() : Token = {
+    var result : Token = null
+    
+    var advancing = true
+    var buffer : StringBuilder = new StringBuilder("")
+    
+    while (advancing) {
+      inputStream.mark(5) // usually only a single character will have to be redacted
+
+      var c = inputStream.read().asInstanceOf[Char]
+      buffer.append(c)
+      
+      if (c == '\n') {
+        rows += 1 
+        columns = 0
+      } else {
+        columns += 1
+      }
+
+      // all whitespace characters are treated the same (except for tracking)
+      if (CharUtil.isWhitespace(c)) c = ' '
+
+      recognizers.keys.foreach(_.advance(c))
+      
+      try {
+        val accepted = recognizers.keys.filter(_.accepting).head
+        val lexeme = new Lexeme(buffer.substring(0, buffer.length-1), rows, columns)
+        val construction = recognizers.get(accepted).get
+        result = construction(lexeme)
+        advancing = false
+        inputStream.reset()
+      } catch {
+        case e : Exception => {}
+      }
+      
+      // check returns
+      // check retraction
+    }
+
+    result
+  }
 
   /**
-   * Implements the conversion between Mona literal format to internal compiler
-   * representation (String).
+   * A stream object containing the tokens from the source code.
    */
-  def lexemeToLiteral(lexemeData: String): String = {
-    // All characters treated literally, functions with newlines etc.
-    if (lexemeData.startsWith("\"\"\""))
-      lexemeData.stripPrefix("\"\"\"").stripSuffix("\"\"\"")
-    else
-      //TODO convert control characters etc
-      lexemeData.stripPrefix("\"").stripSuffix("\"")
-  }
+  val tokenStream = Stream.continually(getNextToken)
 }

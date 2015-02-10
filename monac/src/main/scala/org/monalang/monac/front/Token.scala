@@ -1,7 +1,7 @@
 package org.monalang.monac.front
 
 /**
- * A constituent single unit of source code.
+ * A single unit of source code.
  *
  * Each token is associated with a single instance of the Lexeme class, which
  * holds lexical information such as the initial raw string and coordinates in
@@ -9,14 +9,16 @@ package org.monalang.monac.front
  */
 abstract class Token(lexeme: Lexeme)
 
-case class Numerical(lexeme: Lexeme) extends Token(lexeme) {
-  val value = Lexer.lexemeToNumerical(lexeme.data)
+case class Numeral(lexeme: Lexeme) extends Token(lexeme) {
+  val value = LexerConversions.lexemeToNumeral(lexeme.data)
 }
 
 case class Literal(lexeme: Lexeme) extends Token(lexeme) {
-  val value = Lexer.lexemeToLiteral(lexeme.data)
+  val value = LexerConversions.lexemeToLiteral(lexeme.data)
 }
 
 case class Identifier(lexeme: Lexeme) extends Token(lexeme) {
   val value = lexeme.data
 }
+
+case class EndOfSource() extends Token(new Lexeme("", 0, 0))
