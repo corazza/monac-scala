@@ -37,6 +37,8 @@ class FSA(transitions: TransitionDiagram, startingState: Int) {
 }
 
 object FSA {
+  def apply(dfa: TransitionDiagram) = new FSA(dfa, 0)
+    
   def apply(expression: String): FSA = {
     val regex = Regex(expression)
     val nfa = TransitionDiagram.nfa(regex)

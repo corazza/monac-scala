@@ -5,9 +5,17 @@ import scala.collection.mutable.ArrayBuffer;
 /**
  * Information about a finite state automaton transition functions.
  *
- * 0 represents no transition, 1 eta-transition
+ * character 0 represents no transition, 1 eta-transition
+ * 
+ * state 0 is the initial state, state n is the final state
  */
 class TransitionDiagram(var nstates: Int) {
+  val NoTransition = 0
+  val EtaTransition = 1
+  val CharacterTransition = 2
+  val DigitTransition = 3
+  val SpecialTransition = 4
+    
   /**
    * Transition graph representing the state machine.
    */
@@ -26,7 +34,7 @@ class TransitionDiagram(var nstates: Int) {
    *
    * @return state
    */
-  private def addState(): Int = {
+  def addState(): Int = {
     nstates += 1
     val newrow = ArrayBuffer[Char]()
     for (i <- 0 to (nstates - 1)) {
@@ -39,12 +47,48 @@ class TransitionDiagram(var nstates: Int) {
   /**
    * Create a transition rule `from --(over)--> to`
    */
-  private def addTransition(from: Int, to: Int, over: Char) {
+  def addTransition(from: Int, to: Int, over: Char) {
     matrix(from)(to) = over
   }
 
-  private def removeTransition(from: Int, to: Int) {
+  def removeTransition(from: Int, to: Int) {
     matrix(from)(to) = 0
+  }
+  
+  def beginState = 0
+  def endState = nstates-1
+  
+  /**
+   * Expands a state of the diagram with another diagram.
+   * 
+   * A - state being expanded
+   * B - this graph
+   * C - graph being added
+   */
+   // TODO test this
+  def expandState(state: Int, td: TransitionDiagram) {
+    val mystates = nstates
+    for (i <- 0 to (td.nstates-2)) addState
+      
+    // save what A previously lead to
+    val previousLeads = matrix(state).copy    
+    
+    // change A to be the beginning of C
+    for (i <- 0 to (td.nstates-1)) {
+      matrix(state)(i) = td.matrix(0)(i)+mystates
+    }
+    
+    // connect remaining states in B according to C
+    for (i <- 1 to (td.nstates-2)) {
+      for (j <- 1 to (td.nstates-2)) {
+        addTransition(i+mystates, j+mystates, td.matrix()())
+      }
+    }
+    
+    // set C's final state's leads to what A previously lead to
+    for (i <- 0 to mystates-1) {
+      matrix(td.endState+mystates)(i) = previousLeads(i)
+    }
   }
 
   /**
@@ -85,20 +129,84 @@ class TransitionDiagram(var nstates: Int) {
   }
 }
 
-object TransitionDiagram {
+object TransitionDiagram {  
   private def eval(node: Node): TransitionDiagram = {
     node match {
+      case Empty => {
+          val result = new TransitionDiagram(2)
+          result.addTransition(0, 1, EtaTransition)
+          result
+      }
+        
       case Lit(lit) => {
-        // diagram with the required states
+          val result = new TransitionDiagram(2)
+          result.addTransition(0, 1, lit)
+          result
       }
       
+      case Character => {
+          val result = new TransitionDiagram(2)
+          result.addTransition(0, 1, CharacterTransition)
+          result
+      }
+
+      case Digit => {
+          val result = new TransitionDiagram(2)
+          result.addTransition(0, 1, DigitTransition)
+          result
+      }
+      
+      case Special => {
+          val result = new TransitionDiagram(2)
+          result.addTransition(0, 1, SpecialTransition)
+          result
+      }
+
       case Union(left, right) => {
         val leftDiag = eval(left)
         val rightDiag = eval(right)
+        // 0 is begin, 1 and 2 are left and right, 3 is end
         val result = new TransitionDiagram(4)
-        // 0 is begin, 1 and 2 are left and right, 3 is end - merge
         
-        // HERE
+        result.addTransition(0, 1, EtaTransition)
+        result.addTransition(0, 2, EtaTransition)
+        result.addTransition(1, 3, EtaTransition)
+        result.addTransition(2, 3, EtaTransition)
+
+        result.expandState(1, leftDiag)
+        result.expandState(2, rightDiag)        
+        
+        result
+      }
+      
+      case Cat(first, second) => {
+        val firstDiag = eval(first)
+        val secondDiag = eval(second)
+        // 0 is begin, 1 and 2 are left and right, 3 is end
+        val result = new TransitionDiagram(4)
+
+        result.addTransition(0, 1, EtaTransition)
+        result.addTransition(1, 2, EtaTransition)
+        result.addTransition(2, 3, EtaTransition)
+
+        result.expandState(1, firstDiag)
+        result.expandState(2, secondDiag)        
+
+        result
+      }
+      
+      case Kleene(node) => {
+        val diag = eval(node)
+        // 0 is begin, 1 is node beginning, 2 is node end, 3 is graph end
+        val result = new TransitionDiagram(4)
+        
+        result.addTransition(0, 1, EtaTransition)
+        result.addTransition(1, 2, EtaTransition)
+        result.addTransition(2, 3, EtaTransition)
+        result.addTransition(2, 1, EtaTransition)
+        result.addTransition(0, 3, EtaTransition)
+
+        result.expandState(1, diag)
       }
     }
   }

@@ -4,6 +4,7 @@ import scala.collection.mutable.Stack
 import scala.collection.mutable.ArrayBuffer
 
 abstract class Node()
+case object Empty extends Node
 case class Kleene(node: Node) extends Node
 case class Union(left: Node, right: Node) extends Node
 case class Cat(left: Node, right: Node) extends Node
