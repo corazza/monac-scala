@@ -26,7 +26,7 @@ class TransitionDiagram(var nstates: Int) {
    *
    * @return state
    */
-  def addState(): Int = {
+  private def addState(): Int = {
     nstates += 1
     val newrow = ArrayBuffer[Char]()
     for (i <- 0 to (nstates - 1)) {
@@ -39,11 +39,11 @@ class TransitionDiagram(var nstates: Int) {
   /**
    * Create a transition rule `from --(over)--> to`
    */
-  def addTransition(from: Int, to: Int, over: Char) {
+  private def addTransition(from: Int, to: Int, over: Char) {
     matrix(from)(to) = over
   }
 
-  def removeTransition(from: Int, to: Int) {
+  private def removeTransition(from: Int, to: Int) {
     matrix(from)(to) = 0
   }
 
@@ -86,11 +86,25 @@ class TransitionDiagram(var nstates: Int) {
 }
 
 object TransitionDiagram {
-  def nfa(regex: Regex): TransitionDiagram = {
-    ???
-    // HERE
+  private def eval(node: Node): TransitionDiagram = {
+    node match {
+      case Lit(lit) => {
+        // diagram with the required states
+      }
+      
+      case Union(left, right) => {
+        val leftDiag = eval(left)
+        val rightDiag = eval(right)
+        val result = new TransitionDiagram(4)
+        // 0 is begin, 1 and 2 are left and right, 3 is end - merge
+        
+        // HERE
+      }
+    }
   }
-
+  
+  def nfa(regex: Regex): TransitionDiagram = eval(regex.first)
+  
   def nfaToDfa(nfa: TransitionDiagram): TransitionDiagram = {
     ???
   }
