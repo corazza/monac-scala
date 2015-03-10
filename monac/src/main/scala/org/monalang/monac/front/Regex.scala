@@ -7,7 +7,7 @@ abstract class Node()
 case object Empty extends Node
 case class Kleene(node: Node) extends Node
 case class Union(left: Node, right: Node) extends Node
-case class Cat(left: Node, right: Node) extends Node
+case class Cat(first: Node, second: Node) extends Node
 case class Lit(lit: Char) extends Node
 // recognizes all characters
 case object Character extends Node
@@ -16,7 +16,9 @@ case object Digit extends Node
 // recognizes special characters
 case object Special extends Node
 
-class Regex(val first: Node)
+class Regex(val first: Node) {
+  override def toString = first toString
+}
 
 object Regex {
   def apply(regex: String): Regex = {
