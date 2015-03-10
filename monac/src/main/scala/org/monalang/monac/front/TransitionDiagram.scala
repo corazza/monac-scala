@@ -1,6 +1,7 @@
 package org.monalang.monac.front
 
 import scala.collection.mutable.ArrayBuffer;
+import scala.collection.mutable.Queue;
 
 /**
  * Information about a finite state automaton transition functions.
@@ -233,7 +234,136 @@ object TransitionDiagram {
 
   def nfa(regex: Regex): TransitionDiagram = eval(regex.first)
 
+  // TODO implement
+  def minimize(dfa: TransitionDiagram) = dfa
+
   def nfaToDfa(nfa: TransitionDiagram): TransitionDiagram = {
-    ???
+    def getClosure(nfaState: Int, over: Char): Set[Int] = ???
+    def getEtaClosure(nfaState: Int) = getClosure(nfaState, EtaTransition)
+
+    val result = new TransitionDiagram(0)
+    val stateQueue = new Queue[Int]
+    val stateMap = Map[Int, Set[Int]]()
+    
+    stateQueue.enqueue(0)
+
+    while (!stateQueue.isEmpty) {
+      val state = stateQueue.dequeue()
+
+      // get moves (eta, a, b, ...)
+      // for each move, get closure
+      // for each closure, create transition in result
+      // for new closures, create state in result, enqueue
+    }
+
+    minimize(result)
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
