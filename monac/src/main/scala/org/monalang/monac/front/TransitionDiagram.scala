@@ -21,6 +21,8 @@ class TransitionDiagram(var nstates: Int) {
       row += TransitionDiagram.NoTransition
     matrix += row
   }
+  
+  def states = Range(0, nstates) toList
 
   /**
    * Creates a new state not connected to any other.
@@ -240,17 +242,41 @@ object TransitionDiagram {
   def nfaToDfa(nfa: TransitionDiagram): TransitionDiagram = {
     def getClosure(nfaState: Int, over: Char): Set[Int] = ???
     def getEtaClosure(nfaState: Int) = getClosure(nfaState, EtaTransition)
+    def getTransitions(nfaStates: Set[Int]): Set[Char] = ???
 
     val result = new TransitionDiagram(0)
+    // dfa states to be processed
     val stateQueue = new Queue[Int]
+    // nfa state -> {dfa states}
     val stateMap = Map[Int, Set[Int]]()
     
+    // first state of dfa
     stateQueue.enqueue(0)
+    // needs to be kickstarted with the eta-transition - it is all these states
+    stateMap += 0 -> getEtaClosure(0)
 
     while (!stateQueue.isEmpty) {
+      // dfa label
       val state = stateQueue.dequeue()
+      // states in nfa
+      val etaClosure = stateMap(state)
 
-      // get moves (eta, a, b, ...)
+      // get transition
+      
+      val transitions = getTransitions(etaClosure)
+      
+      val newStates = transitions map { c: Char => 
+        // for each in etaClosure, check if has transition over c, if so, add
+        nfa.states filter { state =>
+          def checkTransition(i: Int, to: Int): Boolean = {
+              if (nfa.fromState(etaClosure(i), c) == to) true
+              else if (i+1 == etaClosure length) false
+              else checkTransition(i+1, state)
+          }
+          checkTransition(0, state)
+        }
+      }
+      
       // for each move, get closure
       // for each closure, create transition in result
       // for new closures, create state in result, enqueue
