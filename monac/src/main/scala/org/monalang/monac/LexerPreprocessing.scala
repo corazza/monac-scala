@@ -1,32 +1,17 @@
 package org.monalang.monac
 
-import org.monalang.monac.front.TransitionDiagram
+import org.monalang.monac.front.TransitionDiagramEditor
 import org.monalang.monac.common.util.FileUtil
-import org.monalang.monac.front.TransitionDiagram
+import org.monalang.monac.front.TransitionDiagramEditor
 import org.monalang.monac.front.Regex
+import org.monalang.monac.front.TransitionDiagramEditor
 
 object LexerPreprocessing extends App {
   val identifier = "identifier"
 
-  def fromFile(path: String): TransitionDiagram = {
-    val source = scala.io.Source.fromFile(path)
-    val s = source mkString "\n"
+  def fromFile(path: String /*, regex (all in one file)*/ ): TransitionDiagramEditor = ???
 
-    val rows = s split '\n'
-    val nstates = rows length
-
-    val td = new TransitionDiagram(nstates)
-
-    for (i <- 0 to nstates - 1) {
-      for (j <- 0 to nstates - 1) {
-        td.addTransition(i, j, rows(i)(j))
-      }
-    }
-
-    td
-  }
-
-  def toFile(td: TransitionDiagram, path: String) {
+  def toFile(td: TransitionDiagramEditor, path: String) {
     val s = td toString
     val toWrite = s filter (_ != ' ')
     FileUtil.writeToFile(path, toWrite)
@@ -34,8 +19,8 @@ object LexerPreprocessing extends App {
 
   def save(name: String, expression: String) {
     val regex = Regex(expression)
-    val nfa = TransitionDiagram.nfa(regex)
-    val dfa = TransitionDiagram.nfaToDfa(nfa)
+    val nfa = TransitionDiagramEditor.nfa(regex)
+    val dfa = TransitionDiagramEditor.nfaToDfa(nfa)
     toFile(dfa, name)
   }
 

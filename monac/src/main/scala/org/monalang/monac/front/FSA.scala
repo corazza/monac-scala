@@ -12,11 +12,9 @@ class FSA(transitions: TransitionDiagram, startingState: Int) {
    * In case no given transition exists for current state and character combination,
    * the state is left unmodified (no error is thrown).
    */
-  def advance(c: Char) {
-    transitions.fromState(currentState, c) match {
-      case Some(state) => currentState = state
-      case None => Unit
-    }
+  def advance(c: Char) = transitions.fromState(currentState, c) match {
+    case Some(state) => currentState = state
+    case None => Unit
   }
 
   /**
@@ -24,25 +22,29 @@ class FSA(transitions: TransitionDiagram, startingState: Int) {
    *
    * An accepting state is the one without any outward transitions.
    */
-  def accepting() = transitions.outNum(currentState) == 0
-  
+  // TODO figure out accepting algorithm
+  // can't be this because final states may lead back, has to be forced into a
+  // faulty transition from an accepting state
+  def accepting = transitions.outNum(currentState) == 0
+
   override def toString = {
     val r = new StringBuffer("")
-    
+
     r.append(transitions.toString)
     r.append("Current state: " + currentState.toChar + "\n")
-    
+
     r.toString
   }
 }
 
 object FSA {
   def apply(dfa: TransitionDiagram) = new FSA(dfa, 0)
-    
+
+  // TODO (later) read from file
   def apply(expression: String): FSA = {
     val regex = Regex(expression)
-    val nfa = TransitionDiagram.nfa(regex)
-    val dfa = TransitionDiagram.nfaToDfa(nfa)
-    new FSA(dfa, 0)
+    val nfa = TransitionDiagramEditor.nfa(regex)
+    val dfa = TransitionDiagramEditor.nfaToDfa(nfa)
+    new FSA(dfa.getTransitionDiagram, 0)
   }
 }

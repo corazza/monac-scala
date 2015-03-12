@@ -17,6 +17,8 @@ class Lexer(inputStream: BufferedReader) {
    * A map of finite state automatons constructed from regular expressions that
    * analyze the input and identify a corresponding token construction function.
    */
+  // TODO (1) create LexerMeta with name->regex pairs used both by the 
+  // lexer preprocessor and compiler
   private val recognizers = Map(FSA("(C|S)(C|S|D)*") -> identifierMatched _)
 
   /**
