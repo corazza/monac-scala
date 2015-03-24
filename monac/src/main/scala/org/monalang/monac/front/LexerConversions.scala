@@ -16,6 +16,7 @@ object LexerConversions {
    * Implements the conversion between Mona literal format to internal compiler
    * representation (String).
    */
+  // TODO handle escaping symbols
   def lexemeToLiteral(lexemeData: String): String = {
     // All characters treated literally, functions with newlines etc.
     if (lexemeData.startsWith("\"\"\""))

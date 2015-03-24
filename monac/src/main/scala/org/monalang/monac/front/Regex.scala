@@ -9,8 +9,8 @@ case class Kleene(node: Node) extends Node
 case class Union(left: Node, right: Node) extends Node
 case class Cat(first: Node, second: Node) extends Node
 case class Lit(lit: Char) extends Node
-// recognizes all characters
-case object Character extends Node
+// recognizes all letters
+case object Letter extends Node
 // recognizes all digits
 case object Digit extends Node
 // recognizes special characters
@@ -22,12 +22,15 @@ class Regex(val first: Node) {
 
 object Regex {
   def apply(regex: String): Regex = {
-    val postfix = toPostfix(withConcat(regex))
+    val explicitConcat = withConcat(regex)
+    val postfix = toPostfix(explicitConcat)
     new Regex(makeTree(postfix))
   }
 
   /**
    * Parses a postfix regular expression and creates a syntax tree representation of it.
+   *
+   * @param regex regular expression string in postfix form with excplicit concat operators
    */
   private def makeTree(regex: String): Node = {
     val operands = new Stack[Node]()
@@ -48,18 +51,10 @@ object Regex {
           val nodel = operands.pop()
           operands.push(Cat(nodel, noder))
         }
-        case 'C' => {
-          operands.push(Character)
-        }
-        case 'D' => {
-          operands.push(Digit)
-        }
-        case 'S' => {
-          operands.push(Special)
-        }
-        case c: Char => {
-          operands.push(Lit(c))
-        }
+        case 'L' => operands.push(Letter)
+        case 'D' => operands.push(Digit)
+        case 'S' => operands.push(Special)
+        case c: Char => operands.push(Lit(c))
       }
     }
 
@@ -70,28 +65,23 @@ object Regex {
     val operators = new Stack[Char]()
     val result = new StringBuilder()
 
-    def popOperator() {
-      if (operators.size > 0 && operators.top != '(') {
+    def newOperator(c: Char) {
+      if (operators.size == 0 || operators.top == '(') {
+        operators.push(c)
+      } else if (c == '.' && operators.top == '|') {
+        operators.push(c)
+      } else {
         result += operators.pop()
+        newOperator(c)
       }
     }
 
     for (i <- 0 to (regex.length - 1)) {
       regex(i) match {
-        case '*' => {
-          result += '*'
-        }
-        case '.' => {
-          popOperator()
-          operators.push('.')
-        }
-        case '|' => {
-          popOperator()
-          operators.push('|')
-        }
-        case '(' => {
-          operators.push('(')
-        }
+        case '*' => result += '*'
+        case '.' => newOperator('.')
+        case '|' => newOperator('|')
+        case '(' => operators.push('(')
         case ')' => {
           var c = operators.pop()
           while (c != '(') {
@@ -99,9 +89,7 @@ object Regex {
             c = operators.pop()
           }
         }
-        case c: Char => {
-          result += c
-        }
+        case c: Char => result += c
       }
     }
 

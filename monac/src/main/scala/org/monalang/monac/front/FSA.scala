@@ -3,8 +3,11 @@ package org.monalang.monac.front
 /**
  * A finite state automaton constructed from a transition diagram
  */
-class FSA(transitions: TransitionDiagram, startingState: Int) {
+class FSA(val transitions: TransitionDiagram, val startingState: Int) {
   var currentState: Int = startingState
+  var accepting = false
+
+  def atFinal = transitions.finalStates.contains(currentState)
 
   /**
    * Advances the automaton by one character.
@@ -14,24 +17,21 @@ class FSA(transitions: TransitionDiagram, startingState: Int) {
    */
   def advance(c: Char) = transitions.fromState(currentState, c) match {
     case Some(state) => currentState = state
-    case None => Unit
+    case None => {
+      accepting = atFinal
+    }
   }
 
-  /**
-   * Returns true if the current state is accepting.
-   *
-   * An accepting state is the one without any outward transitions.
-   */
-  // TODO figure out accepting algorithm
-  // can't be this because final states may lead back, has to be forced into a
-  // faulty transition from an accepting state
-  def accepting = transitions.outNum(currentState) == 0
+  def reset() = {
+    currentState = startingState
+    accepting = false
+  }
 
   override def toString = {
     val r = new StringBuffer("")
 
     r.append(transitions.toString)
-    r.append("Current state: " + currentState.toChar + "\n")
+    r.append("current state: " + currentState.toChar + "\n")
 
     r.toString
   }
@@ -45,6 +45,6 @@ object FSA {
     val regex = Regex(expression)
     val nfa = TransitionDiagramEditor.nfa(regex)
     val dfa = TransitionDiagramEditor.nfaToDfa(nfa)
-    new FSA(dfa.getTransitionDiagram, 0)
+    new FSA(dfa, 0)
   }
 }
