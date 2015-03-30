@@ -3,7 +3,7 @@ package org.monalang.monac.front
 import scala.collection.mutable.Stack
 import scala.collection.mutable.ArrayBuffer
 
-abstract class Node()
+abstract class Node
 case object Empty extends Node
 case class Kleene(node: Node) extends Node
 case class Union(left: Node, right: Node) extends Node
@@ -15,6 +15,10 @@ case object Letter extends Node
 case object Digit extends Node
 // recognizes special characters
 case object Special extends Node
+// recognizes any character
+case object Whichever
+// period
+case object Period extends Node
 
 class Regex(val first: Node) {
   override def toString = first toString
@@ -54,6 +58,8 @@ object Regex {
         case 'L' => operands.push(Letter)
         case 'D' => operands.push(Digit)
         case 'S' => operands.push(Special)
+        case 'A' => operands.push(Whichever)
+        case 'P' => operands.push(Period)
         case c: Char => operands.push(Lit(c))
       }
     }

@@ -10,14 +10,23 @@ class Lexer(inputStream: BufferedReader) {
   /**
    * A map of finite state automatons constructed from regular expressions that
    * analyze the input and identify a corresponding token construction function.
+   * 
+   * special characters:
+   * 
+   * L - letters
+   * D - digits
+   * S - special characters
+   * A - any character
+   * P - period
    */
-  private val recognizers = Map(FSA("(L|S)(L|S|D)*") -> Identifier,
+  private val recognizers = Map(
+    FSA("(L)(L|D)*") -> Identifier,    
+    FSA("SS*") -> Identifier,
     FSA("DD*") -> Numeral,
-    // HERE
-    // floating point and other number formats
-    // other-precedence operators
+    FSA("DD*PDD*") -> Numeral,
     FSA("\"A*\"") -> Literal,
-    FSA("\"\"\"A*\"\"\"") -> Literal)
+    FSA("\"\"\"A*\"\"\"") -> Literal
+  )
 
   /**
    * Returns the next token from the inputStream.
@@ -51,13 +60,17 @@ class Lexer(inputStream: BufferedReader) {
       recognizers.keys.foreach(_.advance(c))
 
       try {
-        val accepted = recognizers.keys.filter(_.accepting).head
-        val lexeme = new Lexeme(buffer.toString.init, rows, columns)
-        val construction = recognizers.get(accepted).get
-        result = construction(lexeme)
-        advancing = false
-        inputStream.reset()
-        recognizers.keys.foreach(_.reset)
+        val notBroken = recognizers.keys.filter(_.notBroken)
+        val accepting = recognizers.keys.filter(_.accepting)
+        if (notBroken.length == 0 && accepting.length != 0) { 
+          val accepted = accepting.head
+          val lexeme = new Lexeme(buffer.toString.init, rows, columns)
+          val construction = recognizers.get(accepted).get
+          result = construction(lexeme)
+          advancing = false
+          inputStream.reset()
+          recognizers.keys.foreach(_.reset)
+        }
       } catch {
         case e: Exception => {}
       }

@@ -5,6 +5,7 @@ package org.monalang.monac.front
  */
 class FSA(val transitions: TransitionDiagram, val startingState: Int) {
   var currentState: Int = startingState
+  var notBroken = true
   var accepting = false
 
   def atFinal = transitions.finalStates.contains(currentState)
@@ -18,7 +19,9 @@ class FSA(val transitions: TransitionDiagram, val startingState: Int) {
   def advance(c: Char) = transitions.fromState(currentState, c) match {
     case Some(state) => currentState = state
     case None => {
-      accepting = atFinal
+      if (notBroken) accepting = atFinal
+      else accepting = false
+      notBroken = false
     }
   }
 

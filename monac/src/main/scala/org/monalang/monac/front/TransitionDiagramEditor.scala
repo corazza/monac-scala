@@ -79,6 +79,18 @@ object TransitionDiagramEditor {
         result.addTransition(0, 1, TransitionDiagram.SpecialTransition)
         result
       }
+      
+      case Whichever => {
+        val result = new TransitionDiagram(2)
+        result.addTransition(0, 1, TransitionDiagram.AnyTransition)
+        result
+      }
+
+      case Period => {
+        val result = new TransitionDiagram(2)
+        result.addTransition(0, 1, '.')
+        result
+      }
 
       case Union(left, right) => {
         val leftDiag = eval(left)
