@@ -50,45 +50,69 @@ object TransitionDiagramEditor {
 
   private def eval(node: Node): TransitionDiagram = {
     node match {
-      case Empty => {
-        val result = new TransitionDiagram(2)
-        result.addTransition(0, 1, TransitionDiagram.EtaTransition)
-        result
-      }
-
       case Lit(lit) => {
-        val result = new TransitionDiagram(2)
+        val result = TransitionDiagram(2)
         result.addTransition(0, 1, lit)
         result
       }
 
       case Letter => {
-        val result = new TransitionDiagram(2)
+        val result = TransitionDiagram(2)
         result.addTransition(0, 1, TransitionDiagram.LetterTransition)
         result
       }
 
       case Digit => {
-        val result = new TransitionDiagram(2)
+        val result = TransitionDiagram(2)
         result.addTransition(0, 1, TransitionDiagram.DigitTransition)
         result
       }
 
       case Special => {
-        val result = new TransitionDiagram(2)
+        val result = TransitionDiagram(2)
         result.addTransition(0, 1, TransitionDiagram.SpecialTransition)
         result
       }
-      
+
       case Whichever => {
-        val result = new TransitionDiagram(2)
+        val result = TransitionDiagram(2)
         result.addTransition(0, 1, TransitionDiagram.AnyTransition)
         result
       }
 
+      case Newline => {
+        val result = TransitionDiagram(2)
+        result.addTransition(0, 1, '\n')
+        result
+      }
+
       case Period => {
-        val result = new TransitionDiagram(2)
+        val result = TransitionDiagram(2)
         result.addTransition(0, 1, '.')
+        result
+      }
+
+      case Opening => {
+        val result = TransitionDiagram(2)
+        result.addTransition(0, 1, '(')
+        result
+      }
+
+      case Closing => {
+        val result = TransitionDiagram(2)
+        result.addTransition(0, 1, ')')
+        result
+      }
+
+      case Vertical => {
+        val result = TransitionDiagram(2)
+        result.addTransition(0, 1, '|')
+        result
+      }
+
+      case Star => {
+        val result = TransitionDiagram(2)
+        result.addTransition(0, 1, '*')
         result
       }
 
@@ -96,7 +120,7 @@ object TransitionDiagramEditor {
         val leftDiag = eval(left)
         val rightDiag = eval(right)
         // 0 is begin, 1 and 2 are left and right, 3 is end
-        val result = new TransitionDiagram(4)
+        val result = TransitionDiagram(4)
 
         result.addTransition(0, 1, TransitionDiagram.EtaTransition)
         result.addTransition(0, 2, TransitionDiagram.EtaTransition)
@@ -113,7 +137,7 @@ object TransitionDiagramEditor {
         val firstDiag = eval(first)
         val secondDiag = eval(second)
         // 0 is begin, 1 and 2 are left and right, 3 is end
-        val result = new TransitionDiagram(4)
+        val result = TransitionDiagram(4)
 
         result.addTransition(0, 1, TransitionDiagram.EtaTransition)
         result.addTransition(1, 2, TransitionDiagram.EtaTransition)
@@ -128,7 +152,7 @@ object TransitionDiagramEditor {
       case Kleene(node) => {
         val diag = eval(node)
         // 0 is begin, 1 is node beginning, 2 is node end, 3 is graph end
-        val result = new TransitionDiagram(4)
+        val result = TransitionDiagram(4)
 
         result.addTransition(0, 1, TransitionDiagram.EtaTransition)
         result.addTransition(1, 2, TransitionDiagram.EtaTransition)
@@ -157,7 +181,6 @@ object TransitionDiagramEditor {
     def getEtaClosureInner(acc: List[Int], nfaState: Int): List[Int] = {
       val first = getClosure(nfaState, TransitionDiagram.EtaTransition)
       val stateIncluded = first :+ nfaState
-
       if (first.length != 0) {
         val others = first map { state =>
           if (acc.exists(_ == state)) List[Int]()
@@ -174,7 +197,7 @@ object TransitionDiagramEditor {
         (t != TransitionDiagram.NoTransition) && (t != TransitionDiagram.EtaTransition)
       }) flatten) distinct
 
-    val result = new TransitionDiagram(1)
+    val result = TransitionDiagram(1)
 
     // dfa states to be processed
     val stateQueue = new Queue[Int]
@@ -189,6 +212,7 @@ object TransitionDiagramEditor {
 
     // process DFA states
     while (!stateQueue.isEmpty) {
+
       // dfa label
       val state = stateQueue.dequeue()
 
@@ -233,5 +257,11 @@ object TransitionDiagramEditor {
         result.finalStates += dfaState
 
     minimize(result)
+  }
+
+  def fromRegex(expression: String) = {
+    val regex = Regex(expression)
+    val nfa = TransitionDiagramEditor.nfa(regex)
+    TransitionDiagramEditor.nfaToDfa(nfa)
   }
 }

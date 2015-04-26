@@ -9,16 +9,28 @@ package org.monalang.monac.front
  */
 abstract class Token(lexeme: Lexeme)
 
-case class Numeral(lexeme: Lexeme) extends Token(lexeme) {
-  val value = LexerConversions.lexemeToNumeral(lexeme.data)
+case class IntegerNumeral(lexeme: Lexeme) extends Token(lexeme) {
+  val value = LexerConversions.lexemeToIntegerNumeral(lexeme.data)
 }
 
-case class Literal(lexeme: Lexeme) extends Token(lexeme) {
-  val value = LexerConversions.lexemeToLiteral(lexeme.data)
+case class FloatNumeral(lexeme: Lexeme) extends Token(lexeme) {
+  val value = LexerConversions.lexemeToFloatNumeral(lexeme.data)
+}
+
+case class StringLiteral(lexeme: Lexeme) extends Token(lexeme) {
+  val value = LexerConversions.lexemeToStringLiteral(lexeme.data)
+}
+
+case class CharacterLiteral(lexeme: Lexeme) extends Token(lexeme) {
+  val value = LexerConversions.lexemeToCharacterLiteral(lexeme.data)
 }
 
 case class Identifier(lexeme: Lexeme) extends Token(lexeme) {
   val value = lexeme.data
 }
 
-case class EndOfSource() extends Token(new Lexeme("", 0, 0))
+case class Break(lexeme: Lexeme) extends Token(lexeme) {
+  val value = lexeme.data // newline or ;
+}
+
+case object EndOfSource extends Token(new Lexeme("", 0, 0))

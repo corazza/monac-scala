@@ -2,23 +2,30 @@ package org.monalang.monac.front
 
 import scala.collection.mutable.Stack
 import scala.collection.mutable.ArrayBuffer
+import org.monalang.monac.common.util.CharUtil
 
 abstract class Node
-case object Empty extends Node
 case class Kleene(node: Node) extends Node
 case class Union(left: Node, right: Node) extends Node
 case class Cat(first: Node, second: Node) extends Node
 case class Lit(lit: Char) extends Node
-// recognizes all letters
+case class Not(c: Char) extends Node
+
+// classes
 case object Letter extends Node
-// recognizes all digits
 case object Digit extends Node
-// recognizes special characters
 case object Special extends Node
-// recognizes any character
-case object Whichever
-// period
+case object Unicode extends Node
+
+// specific characters
+case object Newline extends Node
 case object Period extends Node
+case object Opening extends Node
+case object Closing extends Node
+case object Vertical extends Node
+case object Star extends Node
+
+case object Whichever extends Node
 
 class Regex(val first: Node) {
   override def toString = first toString
@@ -39,7 +46,7 @@ object Regex {
   private def makeTree(regex: String): Node = {
     val operands = new Stack[Node]()
 
-    for (i <- 0 to (regex.length() - 1)) {
+    for (i <- 0 until regex.length) {
       regex(i) match {
         case '*' => {
           val node = operands.pop()
@@ -59,7 +66,12 @@ object Regex {
         case 'D' => operands.push(Digit)
         case 'S' => operands.push(Special)
         case 'A' => operands.push(Whichever)
+        case 'E' => operands.push(Newline)
         case 'P' => operands.push(Period)
+        case 'O' => operands.push(Opening)
+        case 'C' => operands.push(Closing)
+        case 'V' => operands.push(Vertical)
+        case 'K' => operands.push(Star)
         case c: Char => operands.push(Lit(c))
       }
     }
@@ -109,7 +121,7 @@ object Regex {
     result += regex(0)
 
     def closer(c: Char) = !Set('(', '|').contains(c)
-    def opener(c: Char) = !Set(')', '|', '*').contains(c)
+    def opener(c: Char) = !Set(')', '|', '*', 'N').contains(c)
 
     for (i <- 1 to (regex.length - 1)) {
       val last = regex(i - 1)

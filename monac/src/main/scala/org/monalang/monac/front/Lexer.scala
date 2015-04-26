@@ -4,29 +4,11 @@ import java.io.BufferedReader
 import org.monalang.monac.common.util.CharUtil
 
 class Lexer(inputStream: BufferedReader) {
+  import Lexer._
+
   private var rows = 0
   private var columns = 0
-
-  /**
-   * A map of finite state automatons constructed from regular expressions that
-   * analyze the input and identify a corresponding token construction function.
-   * 
-   * special characters:
-   * 
-   * L - letters
-   * D - digits
-   * S - special characters
-   * A - any character
-   * P - period
-   */
-  private val recognizers = Map(
-    FSA("(L)(L|D)*") -> Identifier,    
-    FSA("SS*") -> Identifier,
-    FSA("DD*") -> Numeral,
-    FSA("DD*PDD*") -> Numeral,
-    FSA("\"A*\"") -> Literal,
-    FSA("\"\"\"A*\"\"\"") -> Literal
-  )
+  private var atEnd = false
 
   /**
    * Returns the next token from the inputStream.
@@ -35,18 +17,51 @@ class Lexer(inputStream: BufferedReader) {
    * the only argument.
    */
   private def getNextToken(): Token = {
+    // HERE
+    // TODO handle comments and whitespace (insert break after newlines and potentially ;)
+    
+    var buffer = new StringBuilder("")
     var result: Token = null
-
     var advancing = true
-    var buffer: StringBuilder = new StringBuilder("")
+    var innerRecognizers = collection.mutable.Map(recognizers.toSeq: _*)
 
-    while (advancing) {
-      inputStream.mark(5) // usually only a single character will have to be retracted
+    var didNotAcceptLast = true
+    var rowsBegin = rows
+    var columnsBegin = columns
 
+    while (advancing && !atEnd) {
+      inputStream.mark(5)
       var c = inputStream.read().asInstanceOf[Char]
-      buffer.append(c)
+      innerRecognizers.keys.foreach(_.advance(c))
 
-      // track position
+      val accepting = innerRecognizers.keys.filter(_.phase == FSAPhase.Accepting)
+      val continuing = innerRecognizers.keys.filter(_.phase == FSAPhase.Continuing)
+
+      if (accepting.size == 1 && continuing.size == 0) {
+        val accepted = accepting.head
+        val lexeme = new Lexeme(buffer.toString, rowsBegin, columnsBegin)
+        val construction = innerRecognizers.get(accepted).get
+        result = construction(lexeme)
+        advancing = false
+        inputStream.reset() // backtrack
+      } else {
+        val notBroken = innerRecognizers.keys.filter(_.phase == FSAPhase.Continuing).toList
+        if (notBroken.size == 0) {
+          buffer = new StringBuilder("")
+          recognizers.keys.foreach(_.reset())
+          innerRecognizers = collection.mutable.Map(recognizers.toSeq: _*)
+          didNotAcceptLast = true
+        } else {
+          innerRecognizers = innerRecognizers.filter(p => notBroken.contains(p._1))
+          if (didNotAcceptLast) {
+            rowsBegin = rows
+            columnsBegin = columns
+          }
+          buffer.append(c)
+          didNotAcceptLast = false
+        }
+      }
+
       if (c == '\n') {
         rows += 1
         columns = 0
@@ -54,28 +69,14 @@ class Lexer(inputStream: BufferedReader) {
         columns += 1
       }
 
-      // all whitespace characters are treated the same (except for tracking)
-      if (c.isWhitespace) c = ' '
-
-      recognizers.keys.foreach(_.advance(c))
-
-      try {
-        val notBroken = recognizers.keys.filter(_.notBroken)
-        val accepting = recognizers.keys.filter(_.accepting)
-        if (notBroken.length == 0 && accepting.length != 0) { 
-          val accepted = accepting.head
-          val lexeme = new Lexeme(buffer.toString.init, rows, columns)
-          val construction = recognizers.get(accepted).get
-          result = construction(lexeme)
-          advancing = false
-          inputStream.reset()
-          recognizers.keys.foreach(_.reset)
-        }
-      } catch {
-        case e: Exception => {}
+      if (c == (-1).asInstanceOf[Char]) {
+        advancing = false
+        atEnd = true
+        result = EndOfSource
       }
     }
 
+    recognizers.keys.foreach(_.reset())
     result
   }
 
@@ -83,4 +84,45 @@ class Lexer(inputStream: BufferedReader) {
    * A stream object containing the tokens from the source code.
    */
   val tokenStream = Stream.continually(getNextToken)
+}
+
+object Lexer {
+  /**
+   * A map of finite state automatons constructed from regular expressions that
+   * analyze the input and identify a corresponding token construction function.
+   *
+   * special characters:
+   *
+   * classes (encompass all characters, no crossover):
+   * L - letters
+   * D - digits
+   * S - ASCII special characters except newline (with period)
+   * U - unicode special characters
+   *
+   * specific characters:
+   * P - period
+   * E - newline
+   * O - open parens
+   * C - closing parens
+   * V - vertical line
+   * K - asterisk
+   *
+   * A - any character except newline
+   *
+   * additional operators:
+   * [NOT IMPLEMENTED] cN - not character (c), accepts characters from all other classes
+   */
+  val special = " P,/!#$%^&KOC_+=\\V~`<>?-\"\'"
+  def toUnion(chars: String): String = chars.toList.map(_ + "|").foldLeft("")((buff, a) => buff + a).init
+  val quoteInner = toUnion(special.filter(_ != '"'))
+  val escapeInner = toUnion(special.filter(_ != '\\'))
+  val stringInner = "(\\A|L|D|U|(" + quoteInner + "))*"
+  val recognizers = Map(
+    FSA("L(L|D)*") -> Identifier,
+    FSA("SS*") -> Identifier,
+    FSA("DD*") -> IntegerNumeral,
+    FSA("DD*PDD*") -> FloatNumeral,
+    FSA("\"" + stringInner + "\"") -> StringLiteral,
+    FSA("\"\"\"" + stringInner + "\"\"\"") -> StringLiteral,
+    FSA("'(\\A|(L|D|U|(" + escapeInner + ")))'") -> CharacterLiteral)
 }

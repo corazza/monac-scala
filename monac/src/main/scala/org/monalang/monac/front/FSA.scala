@@ -1,53 +1,93 @@
 package org.monalang.monac.front
 
+import FSAPhase.Accepting
+import FSAPhase.Broken
+import FSAPhase.Continuing
+import scala.util.Try
+import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.Set
+
+object FSAPhase extends Enumeration {
+  type FSAState = Value
+  val Continuing, Accepting, Broken = Value
+}
 /**
  * A finite state automaton constructed from a transition diagram
  */
-class FSA(val transitions: TransitionDiagram, val startingState: Int) {
+class FSA(val transitions: TransitionDiagram, val startingState: Int, val fromExpression: String) {
+  import FSAPhase._
+
+  var phase = Continuing
   var currentState: Int = startingState
-  var notBroken = true
-  var accepting = false
 
   def atFinal = transitions.finalStates.contains(currentState)
 
-  /**
-   * Advances the automaton by one character.
-   *
-   * In case no given transition exists for current state and character combination,
-   * the state is left unmodified (no error is thrown).
-   */
   def advance(c: Char) = transitions.fromState(currentState, c) match {
     case Some(state) => currentState = state
-    case None => {
-      if (notBroken) accepting = atFinal
-      else accepting = false
-      notBroken = false
-    }
+    case None => if (atFinal) phase = Accepting else phase = Broken
   }
 
   def reset() = {
     currentState = startingState
-    accepting = false
+    phase = Continuing
   }
 
   override def toString = {
     val r = new StringBuffer("")
 
     r.append(transitions.toString)
-    r.append("current state: " + currentState.toChar + "\n")
+    r.append(", current state: " + currentState + "\n")
 
     r.toString
-  }
+  } //
 }
 
 object FSA {
-  def apply(dfa: TransitionDiagram) = new FSA(dfa, 0)
+  var expressionMap = Map[String, TransitionDiagram]()
 
-  // TODO (later) read from file
+  val inputStream = getClass().getResourceAsStream("/expressions")
+  var reading = true
+
+  while (reading) {
+    def getDimensions(): Option[Int] =
+      Try(Reader.readUntil(inputStream, ' ').toInt).toOption
+    def getExpression(): String = Reader.readUntil(inputStream, '\n')
+
+    def getMatrix(dimensions: Int): ArrayBuffer[ArrayBuffer[Char]] = {
+      val matrix = new ArrayBuffer[ArrayBuffer[Char]]()
+      for (i <- 0 until dimensions) {
+        val row = new ArrayBuffer[Char]
+        for (j <- 0 until dimensions) {
+          row += inputStream.read().asInstanceOf[Char]
+        }
+        inputStream.read().asInstanceOf[Char]
+        matrix += row
+      }
+      matrix
+    }
+
+    def getFinalStates(): Set[Int] = {
+      val statesString = Reader.readUntil(inputStream, '\n')
+      val statesList = statesString.split(' ').toList.map(_.toInt)
+      Set() ++ statesList.toSet // because toSet returns immutable
+    }
+
+    val dimensions = getDimensions().getOrElse(-1)
+
+    if (dimensions != -1) {
+      val expression = getExpression()
+      val matrix = getMatrix(dimensions)
+      val finalStates = getFinalStates
+      expressionMap += expression -> TransitionDiagram(matrix, finalStates)
+    } else {
+      reading = false
+    }
+  }
+
   def apply(expression: String): FSA = {
-    val regex = Regex(expression)
-    val nfa = TransitionDiagramEditor.nfa(regex)
-    val dfa = TransitionDiagramEditor.nfaToDfa(nfa)
-    new FSA(dfa, 0)
+    expressionMap.get(expression) match {
+      case Some(td) => new FSA(td, 0, expression)
+      case None => new FSA(TransitionDiagramEditor.fromRegex(expression), 0, expression)
+    }
   }
 }
