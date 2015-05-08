@@ -14,4 +14,4 @@ object MonacMain extends App {
     new FileReader("/home/jan/Projects/Mona/monac-run/hello.mona")))
   val parser = new Parser(lexer.tokenStream)
   println(lexer.tokenStream.takeWhile(_ != EndOfSource).toList)
-}z
+}

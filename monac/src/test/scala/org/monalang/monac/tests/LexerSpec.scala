@@ -29,14 +29,14 @@ class LexerSpec extends FlatSpec {
     val lexer = new Lexer(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(inputString.getBytes()), "ISO-8859-1")))
 
     val correctTokens = List[Token](
-      Identifier(Lexeme("identifier", 1, 6)),
-      Identifier(Lexeme("/=", 2, 6)),
-      Identifier(Lexeme("this", 3, 6)), Identifier(Lexeme("is", 3, 11)), Identifier(Lexeme("a", 3, 14)), Identifier(Lexeme("test", 3, 16)),
-      FloatNumeral(Lexeme("9.99", 3, 21)), IntegerNumeral(Lexeme("000", 3, 26)), IntegerNumeral(Lexeme("100", 3, 30)),
-      Identifier(Lexeme("{}{", 4, 6)),
-      Identifier(Lexeme("{", 5, 6)), Identifier(Lexeme("}", 5, 8)), Identifier(Lexeme("{", 5, 10)),
-      Identifier(Lexeme("{", 6, 6)), StringLiteral(Lexeme("\"another, test\"", 6, 8)), Identifier(Lexeme("}", 6, 24)),
-      CharacterLiteral(Lexeme("'a'", 6, 26)), CharacterLiteral(Lexeme("""'\n'""", 6, 30)), CharacterLiteral(Lexeme("""'\A'""", 6, 35)))
+      Identifier(Lexeme("identifier", 2, 6)),
+      Identifier(Lexeme("/=", 3, 6)),
+      Identifier(Lexeme("this", 4, 6)), Identifier(Lexeme("is", 4, 11)), Identifier(Lexeme("a", 4, 14)), Identifier(Lexeme("test", 4, 16)),
+      FloatNumeral(Lexeme("9.99", 4, 21)), IntegerNumeral(Lexeme("000", 4, 26)), IntegerNumeral(Lexeme("100", 4, 30)),
+      Identifier(Lexeme("{}{", 5, 6)),
+      Identifier(Lexeme("{", 6, 6)), Identifier(Lexeme("}", 6, 8)), Identifier(Lexeme("{", 6, 10)),
+      Identifier(Lexeme("{", 7, 6)), StringLiteral(Lexeme("\"another, test\"", 7, 8)), Identifier(Lexeme("}", 7, 24)),
+      CharacterLiteral(Lexeme("'a'", 7, 26)), CharacterLiteral(Lexeme("""'\n'""", 7, 30)), CharacterLiteral(Lexeme("""'\A'""", 7, 35)))
 
     val pairs = correctTokens zip lexer.tokenStream
     println(pairs)

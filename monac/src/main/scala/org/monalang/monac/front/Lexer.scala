@@ -6,9 +6,14 @@ import org.monalang.monac.common.util.CharUtil
 class Lexer(inputStream: BufferedReader) {
   import Lexer._
 
-  private var rows = 0
-  private var columns = 0
+  private var rows = 1
+  private var columns = 1
   private var atEnd = false
+  private var current = inputStream.read().asInstanceOf[Char]
+  private var next = inputStream.read().asInstanceOf[Char]
+  private var readNext = true
+  private var blockCommentCount = 0
+  private var lineComment = false
 
   /**
    * Returns the next token from the inputStream.
@@ -19,7 +24,7 @@ class Lexer(inputStream: BufferedReader) {
   private def getNextToken(): Token = {
     // HERE
     // TODO handle comments and whitespace (insert break after newlines and potentially ;)
-    
+
     var buffer = new StringBuilder("")
     var result: Token = null
     var advancing = true
@@ -30,50 +35,66 @@ class Lexer(inputStream: BufferedReader) {
     var columnsBegin = columns
 
     while (advancing && !atEnd) {
-      inputStream.mark(5)
-      var c = inputStream.read().asInstanceOf[Char]
-      innerRecognizers.keys.foreach(_.advance(c))
+      if (current == '/' && next == '*') blockCommentCount += 1
+      if (current == '/' && next == '/') lineComment = true
 
-      val accepting = innerRecognizers.keys.filter(_.phase == FSAPhase.Accepting)
-      val continuing = innerRecognizers.keys.filter(_.phase == FSAPhase.Continuing)
+      if (blockCommentCount == 0 && lineComment == false) {
+        innerRecognizers.keys.foreach(_.advance(current))
 
-      if (accepting.size == 1 && continuing.size == 0) {
-        val accepted = accepting.head
-        val lexeme = new Lexeme(buffer.toString, rowsBegin, columnsBegin)
-        val construction = innerRecognizers.get(accepted).get
-        result = construction(lexeme)
-        advancing = false
-        inputStream.reset() // backtrack
-      } else {
-        val notBroken = innerRecognizers.keys.filter(_.phase == FSAPhase.Continuing).toList
-        if (notBroken.size == 0) {
-          buffer = new StringBuilder("")
-          recognizers.keys.foreach(_.reset())
-          innerRecognizers = collection.mutable.Map(recognizers.toSeq: _*)
-          didNotAcceptLast = true
+        val accepting = innerRecognizers.keys.filter(_.phase == FSAPhase.Accepting)
+        val continuing = innerRecognizers.keys.filter(_.phase == FSAPhase.Continuing)
+
+        if (accepting.size == 1 && continuing.size == 0) {
+          val accepted = accepting.head
+          val lexeme = new Lexeme(buffer.toString, rowsBegin, columnsBegin)
+          val construction = innerRecognizers.get(accepted).get
+          result = construction(lexeme)
+          advancing = false
+          readNext = false
         } else {
-          innerRecognizers = innerRecognizers.filter(p => notBroken.contains(p._1))
-          if (didNotAcceptLast) {
-            rowsBegin = rows
-            columnsBegin = columns
+          val notBroken = innerRecognizers.keys.filter(_.phase == FSAPhase.Continuing).toList
+          if (notBroken.size == 0) {
+            buffer = new StringBuilder("")
+            recognizers.keys.foreach(_.reset())
+            innerRecognizers = collection.mutable.Map(recognizers.toSeq: _*)
+            didNotAcceptLast = true
+          } else {
+            innerRecognizers = innerRecognizers.filter(p => notBroken.contains(p._1))
+            if (didNotAcceptLast) {
+              rowsBegin = rows
+              columnsBegin = columns
+            }
+            buffer.append(current)
+            didNotAcceptLast = false
           }
-          buffer.append(c)
-          didNotAcceptLast = false
         }
       }
 
-      if (c == '\n') {
-        rows += 1
-        columns = 0
-      } else {
-        columns += 1
-      }
+      if (readNext) {
+        if (current == '\n') {
+          lineComment = false
+          rows += 1
+          columns = 0
+        } else {
+          columns += 1
+        }
 
-      if (c == (-1).asInstanceOf[Char]) {
-        advancing = false
-        atEnd = true
-        result = EndOfSource
-      }
+        var skip = false
+        if (current == '*' && next == '/' && blockCommentCount > 0) {
+          blockCommentCount -= 1
+          skip = true
+        }
+
+        if (!skip) current = next
+        else current = inputStream.read().asInstanceOf[Char]
+        next = inputStream.read().asInstanceOf[Char]
+
+        if (current == (-1).asInstanceOf[Char]) {
+          advancing = false
+          atEnd = true
+          result = EndOfSource
+        }
+      } else readNext = true
     }
 
     recognizers.keys.foreach(_.reset())
