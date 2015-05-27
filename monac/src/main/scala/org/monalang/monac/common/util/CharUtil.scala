@@ -1,5 +1,7 @@
 package org.monalang.monac.common.util
 
+import org.monalang.monac.front.Lexer
+
 object CharUtil {
-  def isSpecial(c: Char) = !c.isLetterOrDigit && !c.isWhitespace
+  def isSpecial(c: Char) = Lexer.special.contains(c)
 }

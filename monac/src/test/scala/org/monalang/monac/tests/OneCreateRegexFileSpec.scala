@@ -13,8 +13,11 @@ class OneCreateRegexFileSpec extends FlatSpec {
 
     Lexer.recognizers.keys.foreach({ fsa =>
       val expression = fsa.fromExpression
+      println(expression)
       val td = TransitionDiagramEditor.fromRegex(expression)
       val matrix = td.toSaveString
+      println(td)
+      println()
       val dimensions = td.matrix.length.toString
       expressions ++= dimensions + ' ' + expression + '\n' + matrix + '\n'
     })

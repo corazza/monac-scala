@@ -116,6 +116,12 @@ object TransitionDiagramEditor {
         result
       }
 
+      case Space => {
+        val result = TransitionDiagram(2)
+        result.addTransition(0, 1, ' ')
+        result
+      }
+
       case Union(left, right) => {
         val leftDiag = eval(left)
         val rightDiag = eval(right)

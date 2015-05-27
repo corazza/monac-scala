@@ -52,7 +52,6 @@ class TransitionDiagram(val matrix: ArrayBuffer[ArrayBuffer[Char]], val finalSta
   def fromState(state: Int, transition: Char): Option[Int] = {
     // TODO test support for other languages and unicode symbols
 
-    //    println("state: " + state + ", over: " + transition)
     def matchesTransition(c: Char): Boolean =
       c == TransitionDiagram.AnyTransition && transition != '\n' ||
         c == transition ||
@@ -97,7 +96,15 @@ class TransitionDiagram(val matrix: ArrayBuffer[ArrayBuffer[Char]], val finalSta
 
     (matrix toList) foreach { row: ArrayBuffer[Char] =>
       (row toList) foreach { c: Char =>
-        r.append(c)
+        r.append(c match {
+          case TransitionDiagram.NoTransition => "N"
+          case TransitionDiagram.EtaTransition => "E"
+          case TransitionDiagram.AnyTransition => "A"
+          case TransitionDiagram.SpecialTransition => "S"
+          case TransitionDiagram.LetterTransition => "L"
+          case TransitionDiagram.DigitTransition => "D"
+          case c: Char => c
+        })
         r.append(' ')
       }
       r.append('\n')

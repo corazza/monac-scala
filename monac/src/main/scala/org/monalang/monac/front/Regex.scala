@@ -24,6 +24,7 @@ case object Opening extends Node
 case object Closing extends Node
 case object Vertical extends Node
 case object Star extends Node
+case object Space extends Node
 
 case object Whichever extends Node
 
@@ -31,7 +32,26 @@ class Regex(val first: Node) {
   override def toString = first toString
 }
 
+/**
+ * classes (encompass all characters, no crossover):
+ * L - letters
+ * D - digits
+ * S - ASCII special characters that can be used (with period)
+ * U - unicode special characters
+ *
+ * specific characters:
+ * P - period
+ * E - newline
+ * O - open parens
+ * C - closing parens
+ * V - vertical line
+ * K - asterisk
+ * W - space
+ *
+ * A - any character except newline
+ */
 object Regex {
+  // can't mix classes with characters that belong to them -- FIX: enumerate and expand classes
   def apply(regex: String): Regex = {
     val explicitConcat = withConcat(regex)
     val postfix = toPostfix(explicitConcat)
@@ -72,6 +92,7 @@ object Regex {
         case 'C' => operands.push(Closing)
         case 'V' => operands.push(Vertical)
         case 'K' => operands.push(Star)
+        case 'W' => operands.push(Space)
         case c: Char => operands.push(Lit(c))
       }
     }

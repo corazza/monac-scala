@@ -39,7 +39,9 @@ class FSA(val transitions: TransitionDiagram, val startingState: Int, val fromEx
     r.append(", current state: " + currentState + "\n")
 
     r.toString
-  } //
+
+    //    fromExpression
+  }
 }
 
 object FSA {
@@ -84,7 +86,8 @@ object FSA {
     }
   }
 
-  def apply(expression: String): FSA = {
+  def apply(expressiona: String): FSA = {
+    val expression = expressiona.filter(_ != ' ')
     expressionMap.get(expression) match {
       case Some(td) => new FSA(td, 0, expression)
       case None => new FSA(TransitionDiagramEditor.fromRegex(expression), 0, expression)
