@@ -48,128 +48,126 @@ object TransitionDiagramEditor {
     }
   }
 
-  private def eval(node: Node): TransitionDiagram = {
-    node match {
-      case Lit(lit) => {
-        val result = TransitionDiagram(2)
-        result.addTransition(0, 1, lit)
-        result
-      }
+  private def eval(node: Node): TransitionDiagram = node match {
+    case Lit(lit) => {
+      val result = TransitionDiagram(2)
+      result.addTransition(0, 1, lit)
+      result
+    }
 
-      case Letter => {
-        val result = TransitionDiagram(2)
-        result.addTransition(0, 1, TransitionDiagram.LetterTransition)
-        result
-      }
+    case Letter => {
+      val result = TransitionDiagram(2)
+      result.addTransition(0, 1, TransitionDiagram.LetterTransition)
+      result
+    }
 
-      case Digit => {
-        val result = TransitionDiagram(2)
-        result.addTransition(0, 1, TransitionDiagram.DigitTransition)
-        result
-      }
+    case Digit => {
+      val result = TransitionDiagram(2)
+      result.addTransition(0, 1, TransitionDiagram.DigitTransition)
+      result
+    }
 
-      case Special => {
-        val result = TransitionDiagram(2)
-        result.addTransition(0, 1, TransitionDiagram.SpecialTransition)
-        result
-      }
+    case Special => {
+      val result = TransitionDiagram(2)
+      result.addTransition(0, 1, TransitionDiagram.SpecialTransition)
+      result
+    }
 
-      case Whichever => {
-        val result = TransitionDiagram(2)
-        result.addTransition(0, 1, TransitionDiagram.AnyTransition)
-        result
-      }
+    case Whichever => {
+      val result = TransitionDiagram(2)
+      result.addTransition(0, 1, TransitionDiagram.AnyTransition)
+      result
+    }
 
-      case Newline => {
-        val result = TransitionDiagram(2)
-        result.addTransition(0, 1, '\n')
-        result
-      }
+    case Newline => {
+      val result = TransitionDiagram(2)
+      result.addTransition(0, 1, '\n')
+      result
+    }
 
-      case Period => {
-        val result = TransitionDiagram(2)
-        result.addTransition(0, 1, '.')
-        result
-      }
+    case Period => {
+      val result = TransitionDiagram(2)
+      result.addTransition(0, 1, '.')
+      result
+    }
 
-      case Opening => {
-        val result = TransitionDiagram(2)
-        result.addTransition(0, 1, '(')
-        result
-      }
+    case Opening => {
+      val result = TransitionDiagram(2)
+      result.addTransition(0, 1, '(')
+      result
+    }
 
-      case Closing => {
-        val result = TransitionDiagram(2)
-        result.addTransition(0, 1, ')')
-        result
-      }
+    case Closing => {
+      val result = TransitionDiagram(2)
+      result.addTransition(0, 1, ')')
+      result
+    }
 
-      case Vertical => {
-        val result = TransitionDiagram(2)
-        result.addTransition(0, 1, '|')
-        result
-      }
+    case Vertical => {
+      val result = TransitionDiagram(2)
+      result.addTransition(0, 1, '|')
+      result
+    }
 
-      case Star => {
-        val result = TransitionDiagram(2)
-        result.addTransition(0, 1, '*')
-        result
-      }
+    case Star => {
+      val result = TransitionDiagram(2)
+      result.addTransition(0, 1, '*')
+      result
+    }
 
-      case Space => {
-        val result = TransitionDiagram(2)
-        result.addTransition(0, 1, ' ')
-        result
-      }
+    case Space => {
+      val result = TransitionDiagram(2)
+      result.addTransition(0, 1, ' ')
+      result
+    }
 
-      case Union(left, right) => {
-        val leftDiag = eval(left)
-        val rightDiag = eval(right)
-        // 0 is begin, 1 and 2 are left and right, 3 is end
-        val result = TransitionDiagram(4)
+    case Union(left, right) => {
+      val leftDiag = eval(left)
+      val rightDiag = eval(right)
+      // 0 is begin, 1 and 2 are left and right, 3 is end
+      val result = TransitionDiagram(4)
 
-        result.addTransition(0, 1, TransitionDiagram.EtaTransition)
-        result.addTransition(0, 2, TransitionDiagram.EtaTransition)
-        result.addTransition(1, 3, TransitionDiagram.EtaTransition)
-        result.addTransition(2, 3, TransitionDiagram.EtaTransition)
+      result.addTransition(0, 1, TransitionDiagram.EtaTransition)
+      result.addTransition(0, 2, TransitionDiagram.EtaTransition)
+      result.addTransition(1, 3, TransitionDiagram.EtaTransition)
+      result.addTransition(2, 3, TransitionDiagram.EtaTransition)
 
-        expandState(result, 1, leftDiag)
-        expandState(result, 2, rightDiag)
+      expandState(result, 1, leftDiag)
+      expandState(result, 2, rightDiag)
 
-        result
-      }
+      result
+    }
 
-      case Cat(first, second) => {
-        val firstDiag = eval(first)
-        val secondDiag = eval(second)
-        // 0 is begin, 1 and 2 are left and right, 3 is end
-        val result = TransitionDiagram(4)
+    case Cat(first, second) => {
+      val firstDiag = eval(first)
+      val secondDiag = eval(second)
+      // 0 is begin, 1 and 2 are left and right, 3 is end
+      val result = TransitionDiagram(4)
 
-        result.addTransition(0, 1, TransitionDiagram.EtaTransition)
-        result.addTransition(1, 2, TransitionDiagram.EtaTransition)
-        result.addTransition(2, 3, TransitionDiagram.EtaTransition)
+      result.addTransition(0, 1, TransitionDiagram.EtaTransition)
+      result.addTransition(1, 2, TransitionDiagram.EtaTransition)
+      result.addTransition(2, 3, TransitionDiagram.EtaTransition)
 
-        expandState(result, 1, firstDiag)
-        expandState(result, 2, secondDiag)
+      expandState(result, 1, firstDiag)
+      expandState(result, 2, secondDiag)
 
-        result
-      }
+      result
+    }
 
-      case Kleene(node) => {
-        val diag = eval(node)
-        // 0 is begin, 1 is node beginning, 2 is node end, 3 is graph end
-        val result = TransitionDiagram(4)
+    case Kleene(node) => {
+      val diag = eval(node)
+      // 0 is begin, 1 is node beginning, 2 is node end, 3 is graph end
+      val result = TransitionDiagram(4)
 
-        result.addTransition(0, 1, TransitionDiagram.EtaTransition)
-        result.addTransition(1, 2, TransitionDiagram.EtaTransition)
-        result.addTransition(2, 3, TransitionDiagram.EtaTransition)
-        result.addTransition(2, 1, TransitionDiagram.EtaTransition)
-        result.addTransition(0, 3, TransitionDiagram.EtaTransition)
+      result.addTransition(0, 1, TransitionDiagram.EtaTransition)
+      result.addTransition(1, 2, TransitionDiagram.EtaTransition)
+      result.addTransition(2, 3, TransitionDiagram.EtaTransition)
+      result.addTransition(2, 1, TransitionDiagram.EtaTransition)
+      result.addTransition(0, 3, TransitionDiagram.EtaTransition)
 
-        expandState(result, 1, diag)
+      expandState(result, 1, diag)
 
-        result
-      }
+      result
     }
   }
 

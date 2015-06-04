@@ -26,9 +26,6 @@ class Lexer(inputStream: BufferedReader) {
    * the only argument.
    */
   private def getNextToken(): Token = {
-    // HERE
-    // TODO handle whitespace (insert break after newlines and potentially ;)
-
     var buffer = new StringBuilder("")
     var advancing = true
     var innerRecognizers = collection.mutable.Map(recognizers.toSeq: _*)
@@ -85,7 +82,7 @@ class Lexer(inputStream: BufferedReader) {
         }
 
         if (addBreak && (tokenQueue.length > 0 && tokenQueue.last != BreakStatement || tokenQueue.length == 0))
-          tokenQueue += BreakStatement
+          tokenQueue += InsertedBreakStatement
 
         var skip = false
         if (current == '*' && next == '/' && blockCommentCount > 0) {
@@ -133,7 +130,8 @@ object Lexer {
     case "[" => OpenList(lexeme)
     case "]" => CloseList(lexeme)
     case ":" => StatementType(lexeme)
-    case ";" => BreakStatement
+    case "=" => EqualsSign(lexeme)
+    case ";" => BreakStatement(lexeme)
     case _ => Identifier(lexeme)
   }
 

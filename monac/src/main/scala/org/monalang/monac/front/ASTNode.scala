@@ -14,9 +14,9 @@ class Statement extends ASTNode {
 }
 
 /**
- * Represents a binding statement that has taken place.
+ * Represents a definition statement that has taken place.
  */
-class Binding extends Statement {
+class Definition extends Statement {
 
 }
 

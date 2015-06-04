@@ -47,6 +47,12 @@ case class StatementType(lexeme: Lexeme)
 case class FunctionArrow(lexeme: Lexeme)
   extends LexicalToken(lexeme.row, lexeme.column)
 
+case class EqualsSign(lexeme: Lexeme)
+  extends LexicalToken(lexeme.row, lexeme.column)
+
+case class BreakStatement(lexeme: Lexeme)
+  extends LexicalToken(lexeme.row, lexeme.column)
+
 // virtual tokens (inserted)
-case object BreakStatement extends Token
+case object InsertedBreakStatement extends Token
 case object EndOfSource extends Token

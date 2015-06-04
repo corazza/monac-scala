@@ -50,12 +50,14 @@ class Regex(val first: Node) {
  *
  * A - any character except newline
  */
+// TODO escape mechanism
 object Regex {
   // can't mix classes with characters that belong to them -- FIX: enumerate and expand classes
   def apply(regex: String): Regex = {
     val explicitConcat = withConcat(regex)
     val postfix = toPostfix(explicitConcat)
-    new Regex(makeTree(postfix))
+    val firstNode = makeTree(postfix)
+    new Regex(firstNode)
   }
 
   /**
