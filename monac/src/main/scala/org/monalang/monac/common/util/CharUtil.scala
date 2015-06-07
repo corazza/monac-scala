@@ -1,7 +1,7 @@
 package org.monalang.monac.common.util
 
-import org.monalang.monac.front.Lexer
+import org.monalang.monac.front.Recognizer
 
 object CharUtil {
-  def isSpecial(c: Char) = Lexer.special.contains(c)
+  def isUnicode(c: Char) = !Recognizer.whitespace.contains(c) && !Recognizer.letter.contains(c) && !Recognizer.digit.contains(c) && !Recognizer.id.contains(c) && !Recognizer.nonid.contains(c)
 }

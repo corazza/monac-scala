@@ -7,51 +7,61 @@ abstract class Token
  * holds lexical information such as the initial raw string and coordinates in
  * the source code.
  */
-abstract class ValueToken[ValueType](lexeme: Lexeme, value: ValueType) extends Token
+abstract class ValueToken[ValueType](lexeme: ValueLexeme, value: ValueType) extends Token
 
 /**
- * Lexical tokens are associated with predefined lexical entities.
+ * Syntax tokens are associated with purely syntactic elements.
  */
-abstract class LexicalToken(row: Int, column: Int) extends Token
+abstract class SyntacticToken(lexeme: SyntacticLexeme) extends Token
 
-case class IntegerNumeral(lexeme: Lexeme)
-  extends ValueToken(lexeme, LexerConversions.lexemeToIntegerNumeral(lexeme.data))
+/**
+ * Virtual tokens are inserted into the token stream by the lexer and aren't tied to actual lexemes.
+ */
+abstract class VirtualToken extends Token
 
-case class FloatNumeral(lexeme: Lexeme)
-  extends ValueToken(lexeme, LexerConversions.lexemeToFloatNumeral(lexeme.data))
+// constants
+case class IntegerNumeral(lexeme: ValueLexeme) extends ValueToken(lexeme, LexerConversions.lexemeToIntegerNumeral(lexeme.data))
 
-case class StringLiteral(lexeme: Lexeme)
-  extends ValueToken(lexeme, LexerConversions.lexemeToStringLiteral(lexeme.data))
+case class FloatNumeral(lexeme: ValueLexeme) extends ValueToken(lexeme, LexerConversions.lexemeToFloatNumeral(lexeme.data))
 
-case class CharacterLiteral(lexeme: Lexeme)
-  extends ValueToken(lexeme, LexerConversions.lexemeToCharacterLiteral(lexeme.data))
+case class StringLiteral(lexeme: ValueLexeme) extends ValueToken(lexeme, LexerConversions.lexemeToStringLiteral(lexeme.data))
 
-case class Identifier(lexeme: Lexeme)
-  extends ValueToken(lexeme, lexeme.data)
+case class CharacterLiteral(lexeme: ValueLexeme) extends ValueToken(lexeme, LexerConversions.lexemeToCharacterLiteral(lexeme.data))
 
-case class OpenBlock(lexeme: Lexeme)
-  extends LexicalToken(lexeme.row, lexeme.column)
+// purely syntactic elements
+case class OpenParens(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 
-case class CloseBlock(lexeme: Lexeme)
-  extends LexicalToken(lexeme.row, lexeme.column)
+case class CloseParens(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 
-case class OpenList(lexeme: Lexeme)
-  extends LexicalToken(lexeme.row, lexeme.column)
+case class OpenBlock(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 
-case class CloseList(lexeme: Lexeme)
-  extends LexicalToken(lexeme.row, lexeme.column)
+case class CloseBlock(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 
-case class StatementType(lexeme: Lexeme)
-  extends LexicalToken(lexeme.row, lexeme.column)
+case class OpenList(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 
-case class FunctionArrow(lexeme: Lexeme)
-  extends LexicalToken(lexeme.row, lexeme.column)
+case class CloseList(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 
-case class EqualsSign(lexeme: Lexeme)
-  extends LexicalToken(lexeme.row, lexeme.column)
+case class PeriodToken(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 
-case class BreakStatement(lexeme: Lexeme)
-  extends LexicalToken(lexeme.row, lexeme.column)
+case class Comma(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
+
+case class SemiColon(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
+
+case class StatementType(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
+
+case class FunctionArrow(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
+
+case class EqualsSign(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
+
+case class Underscore(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
+
+// identifiers
+case class LowerId(lexeme: ValueLexeme) extends ValueToken(lexeme, lexeme.data)
+
+// starts with lower or is special
+case class UpperId(lexeme: ValueLexeme) extends ValueToken(lexeme, lexeme.data)
+
+// starts with upper or _ or $
 
 // virtual tokens (inserted)
 case object InsertedBreakStatement extends Token

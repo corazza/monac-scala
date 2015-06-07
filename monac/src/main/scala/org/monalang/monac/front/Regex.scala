@@ -1,8 +1,6 @@
 package org.monalang.monac.front
 
 import scala.collection.mutable.Stack
-import scala.collection.mutable.ArrayBuffer
-import org.monalang.monac.common.util.CharUtil
 
 abstract class Node
 case class Kleene(node: Node) extends Node
@@ -11,10 +9,13 @@ case class Cat(first: Node, second: Node) extends Node
 case class Lit(lit: Char) extends Node
 case class Not(c: Char) extends Node
 
-// classes
+// classes (nonenumerated)
 case object Letter extends Node
 case object Digit extends Node
-case object Special extends Node
+
+case object Id extends Node
+
+case object NonId extends Node
 case object Unicode extends Node
 
 // specific characters
@@ -26,18 +27,22 @@ case object Vertical extends Node
 case object Star extends Node
 case object Space extends Node
 
+case object Tab extends Node
+
 case object Whichever extends Node
 
 class Regex(val first: Node) {
-  override def toString = first toString
+  override def toString = first.toString
 }
 
 /**
  * classes (encompass all characters, no crossover):
- * L - letters
+ * W - whitespace
+ * L - letter
  * D - digits
- * S - ASCII special characters that can be used (with period)
- * U - unicode special characters
+ * I - id (special ASCII, operator)
+ * N - nonid
+ * U - unicode (rest)
  *
  * specific characters:
  * P - period
@@ -46,11 +51,11 @@ class Regex(val first: Node) {
  * C - closing parens
  * V - vertical line
  * K - asterisk
- * W - space
+ * S - space
+ * T - tabulator
  *
- * A - any character except newline
+ * A - any character except newline or tab or CR
  */
-// TODO escape mechanism
 object Regex {
   // can't mix classes with characters that belong to them -- FIX: enumerate and expand classes
   def apply(regex: String): Regex = {
@@ -86,15 +91,18 @@ object Regex {
         }
         case 'L' => operands.push(Letter)
         case 'D' => operands.push(Digit)
-        case 'S' => operands.push(Special)
+        case 'I' => operands.push(Id)
+        case 'N' => operands.push(NonId)
+        case 'U' => operands.push(Unicode)
         case 'A' => operands.push(Whichever)
-        case 'E' => operands.push(Newline)
-        case 'P' => operands.push(Period)
         case 'O' => operands.push(Opening)
         case 'C' => operands.push(Closing)
         case 'V' => operands.push(Vertical)
         case 'K' => operands.push(Star)
-        case 'W' => operands.push(Space)
+        case 'S' => operands.push(Space)
+        case 'T' => operands.push(Tab)
+        case 'E' => operands.push(Newline)
+        case 'P' => operands.push(Period)
         case c: Char => operands.push(Lit(c))
       }
     }
@@ -107,7 +115,7 @@ object Regex {
     val result = new StringBuilder()
 
     def newOperator(c: Char) {
-      if (operators.size == 0 || operators.top == '(') {
+      if (operators.isEmpty || operators.top == '(') {
         operators.push(c)
       } else if (c == '.' && operators.top == '|') {
         operators.push(c)

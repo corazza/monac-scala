@@ -1,27 +1,26 @@
 package org.monalang.monac.front
 
-import scala.Range
-import scala.collection.mutable.ArrayBuffer
-import scala.collection.mutable.Set
 import org.monalang.monac.common.util.CharUtil
+
+import scala.collection.mutable.{ArrayBuffer, Set}
 
 /**
  * Common diagram functionality
  */
 class TransitionDiagram(val matrix: ArrayBuffer[ArrayBuffer[Char]], val finalStates: Set[Int]) {
-  def currentStates = matrix.length
   def beginState = 0
+
   def endState: Int = {
     def isEndState(state: Int): Boolean = {
-      val eq = matrix(state)(0)
-      for (i <- 0 to currentStates - 1) if (matrix(state)(i) != eq) (return false)
+      val eq = matrix(state).head
+      for (i <- 0 to currentStates - 1) if (matrix(state)(i) != eq) return false
       return true
     }
-    for (i <- 0 until currentStates) if (isEndState(i)) (return i)
-    return currentStates - 1
+    for (i <- 0 until currentStates) if (isEndState(i)) return i
+    currentStates - 1
   }
 
-  def states = Range(0, currentStates) toList
+  def currentStates = matrix.length
 
   /**
    * Not final, just states which have no leads.
@@ -33,6 +32,8 @@ class TransitionDiagram(val matrix: ArrayBuffer[ArrayBuffer[Char]], val finalSta
       }
     }
   }
+
+  def states = Range(0, currentStates).toList
 
   /**
    * The number of nodes `state` leads to.
@@ -53,17 +54,19 @@ class TransitionDiagram(val matrix: ArrayBuffer[ArrayBuffer[Char]], val finalSta
     // TODO test support for other languages and unicode symbols
 
     def matchesTransition(c: Char): Boolean =
-      c == TransitionDiagram.AnyTransition && transition != '\n' ||
+      c == TransitionDiagram.AnyTransition && !Recognizer.without(Recognizer.whitespace, '\u0020').contains(transition) ||
         c == transition ||
-        c == TransitionDiagram.LetterTransition && transition.isLetter ||
-        c == TransitionDiagram.DigitTransition && transition.isDigit ||
-        c == TransitionDiagram.SpecialTransition && CharUtil.isSpecial(transition)
+        c == TransitionDiagram.LetterTransition && Recognizer.letter.contains(transition) ||
+        c == TransitionDiagram.DigitTransition && Recognizer.digit.contains(transition) ||
+        c == TransitionDiagram.IdTransition && Recognizer.id.contains(transition) ||
+        c == TransitionDiagram.NonIdTransition && Recognizer.nonid.contains(transition) ||
+        c == TransitionDiagram.UnicodeTransition && CharUtil.isUnicode(transition)
 
     val result = (matrix(state) zipWithIndex) filter (_ match {
       case (c, i) => matchesTransition(c)
     })
 
-    if (result.length == 0) None else Some(result.head._2)
+    if (result.isEmpty) None else Some(result.head._2)
   }
 
   /**
@@ -94,15 +97,17 @@ class TransitionDiagram(val matrix: ArrayBuffer[ArrayBuffer[Char]], val finalSta
   override def toString = {
     val r = new StringBuffer("")
 
-    (matrix toList) foreach { row: ArrayBuffer[Char] =>
-      (row toList) foreach { c: Char =>
+    matrix.toList.foreach { row: ArrayBuffer[Char] =>
+      row.toList.foreach { c: Char =>
         r.append(c match {
           case TransitionDiagram.NoTransition => "N"
           case TransitionDiagram.EtaTransition => "E"
           case TransitionDiagram.AnyTransition => "A"
-          case TransitionDiagram.SpecialTransition => "S"
           case TransitionDiagram.LetterTransition => "L"
           case TransitionDiagram.DigitTransition => "D"
+          case TransitionDiagram.IdTransition => "I"
+          case TransitionDiagram.NonIdTransition => "N"
+          case TransitionDiagram.UnicodeTransition => "U"
           case c: Char => c
         })
         r.append(' ')
@@ -118,8 +123,8 @@ class TransitionDiagram(val matrix: ArrayBuffer[ArrayBuffer[Char]], val finalSta
   def toSaveString = {
     val r = new StringBuffer("")
 
-    (matrix toList) foreach { row: ArrayBuffer[Char] =>
-      (row toList) foreach { c: Char =>
+    matrix.toList.foreach { row: ArrayBuffer[Char] =>
+      row.toList.foreach { c: Char =>
         r.append(c)
       }
       r.append('\n')
@@ -139,9 +144,11 @@ object TransitionDiagram {
   // classes
   val LetterTransition = 2: Char
   val DigitTransition = 3: Char
-  val SpecialTransition = 4: Char
+  val IdTransition = 4: Char
+  val NonIdTransition = 5: Char
+  val UnicodeTransition = 6: Char
 
-  val AnyTransition = 5: Char // except newline
+  val AnyTransition = 7: Char // except newline
 
   /**
    * Create empty transition diagram with initialStates states

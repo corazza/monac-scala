@@ -1,31 +1,16 @@
 package org.monalang.monac.tests
 
-import java.io.BufferedReader
-import java.io.ByteArrayInputStream
-import java.io.InputStreamReader
-import scala.BigInt
-import org.monalang.monac.front.Identifier
-import org.monalang.monac.front.Lexeme
-import org.monalang.monac.front.Lexer
-import org.monalang.monac.front.LexerConversions
-import org.monalang.monac.front.IntegerNumeral
-import org.monalang.monac.front.FloatNumeral
-import org.monalang.monac.front.Token
+import java.io.{BufferedReader, ByteArrayInputStream, InputStreamReader}
+
+import org.monalang.monac.front._
 import org.scalatest.FlatSpec
-import org.monalang.monac.front.StringLiteral
-import org.monalang.monac.front.CharacterLiteral
-import org.monalang.monac.front.StatementType
-import org.monalang.monac.front.BreakStatement
-import org.monalang.monac.front.EndOfSource
-import org.monalang.monac.front.OpenBlock
-import org.monalang.monac.front.CloseBlock
 
 class LexerSpec extends FlatSpec {
   "Lexer" should "correctly tokenize an input string" in {
     val inputString = """
-      ::;
+      : :;
       /=
-      this is :: test 9.99 000 100
+      this is :: Test -    9.99 000 -100 9
       {}{
       { } {
       { "another, test" } 'a' '\n' '\A'
@@ -34,18 +19,17 @@ class LexerSpec extends FlatSpec {
     val lexer = new Lexer(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(inputString.getBytes()), "ISO-8859-1")))
 
     val correctTokens = List[Token](
-      StatementType(Lexeme("::", 2, 6)),
-      Identifier(Lexeme("/=", 3, 6)),
-      Identifier(Lexeme("this", 4, 6)), Identifier(Lexeme("is", 4, 11)), StatementType(Lexeme("::", 4, 14)), Identifier(Lexeme("test", 4, 17)),
-      FloatNumeral(Lexeme("9.99", 4, 22)), IntegerNumeral(Lexeme("000", 4, 27)), IntegerNumeral(Lexeme("100", 4, 31)),
-      OpenBlock(Lexeme("{", 5, 6)), CloseBlock(Lexeme("}", 5, 7)), OpenBlock(Lexeme("{", 5, 8)),
-      OpenBlock(Lexeme("{", 6, 6)), CloseBlock(Lexeme("}", 6, 8)), OpenBlock(Lexeme("{", 6, 10)),
-      OpenBlock(Lexeme("{", 7, 6)), StringLiteral(Lexeme("\"another, test\"", 7, 8)), CloseBlock(Lexeme("}", 7, 24)),
-      CharacterLiteral(Lexeme("'a'", 7, 26)), CharacterLiteral(Lexeme("""'\n'""", 7, 30)), CharacterLiteral(Lexeme("""'\A'""", 7, 35)))
+      StatementType(SyntacticLexeme(2, 6)), StatementType(SyntacticLexeme(2, 8)), SemiColon(SyntacticLexeme(2, 9)),
+      LowerId(ValueLexeme(3, 6, "/=")),
+      LowerId(ValueLexeme(4, 6, "this")), LowerId(ValueLexeme(4, 11, "is")), LowerId(ValueLexeme(4, 14, "::")), UpperId(ValueLexeme(4, 17, "Test")),
+      FloatNumeral(ValueLexeme(4, 22, "-    9.99")), IntegerNumeral(ValueLexeme(4, 32, "000")), IntegerNumeral(ValueLexeme(4, 36, "-100")), IntegerNumeral(ValueLexeme(4, 41, "9")),
+      OpenBlock(SyntacticLexeme(5, 6)), CloseBlock(SyntacticLexeme(5, 7)), OpenBlock(SyntacticLexeme(5, 8)),
+      OpenBlock(SyntacticLexeme(6, 6)), CloseBlock(SyntacticLexeme(6, 8)), OpenBlock(SyntacticLexeme(6, 10)),
+      OpenBlock(SyntacticLexeme(7, 6)), StringLiteral(ValueLexeme(7, 8, "\"another, test\"")), CloseBlock(SyntacticLexeme(7, 24)),
+      CharacterLiteral(ValueLexeme(7, 26, "'a'")), CharacterLiteral(ValueLexeme(7, 30, """'\n'""")), CharacterLiteral(ValueLexeme(7, 35, """'\A'""")))
 
-    val output = lexer.tokenStream.takeWhile(_ != EndOfSource).toList.filter(_ != BreakStatement)
-    val pairs = correctTokens zip output
-    println(pairs)
+    val output = lexer.tokenStream.takeWhile(_ != EndOfSource).toList.filter(_ != InsertedBreakStatement)
+    val pairs = output zip correctTokens
 
     pairs foreach { pair =>
       // check position and content of lexemes
@@ -54,8 +38,6 @@ class LexerSpec extends FlatSpec {
       assert(token == correct)
     }
   }
-
-  // TODO test unicode
 }
 
 class LexerStaticSpec extends FlatSpec {
