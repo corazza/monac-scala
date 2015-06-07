@@ -1,44 +1,23 @@
-# use glob syntax.
-syntax: glob
-*.ser
+# scala
+target
 *.class
-*~
-*.bak
-#*.off
-*.old
 
-# eclipse conf file
-.settings
+# intellij
+*.iml
+*.ipr
+*.iws
+.idea
+out
+
+# vim
+tags
+.*.swp
+.*.swo
+
+# eclipse
+build
 .classpath
 .project
-.manager
-.scala_dependencies
-
-# idea
-.idea
-*.iml
-
-# building
-target
-build
-null
-tmp*
-temp*
-dist
-test-output
-build.log
-
-# other scm
-.svn
-.CVS
-.hg*
-
-# switch to regexp syntax.
-#  syntax: regexp
-#  ^\.pc/
-
-#SHITTY output not in target directory
-build.log
-
-# Additional Maven files (Jan)
-.cache
+.settings
+org.scala-ide.sdt.core/META-INF/MANIFEST.MF
+org.scala-ide.sdt.update-site/site.xml
