@@ -3,6 +3,7 @@ package org.monalang.monac.front
 import FSAPhase.Accepting
 import FSAPhase.Broken
 import FSAPhase.Continuing
+import org.monalang.monac.common.util.Reader
 import scala.util.Try
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.Set

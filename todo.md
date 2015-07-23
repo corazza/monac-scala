@@ -1,4 +1,5 @@
- - nfaToDfa too slow
+Add comments and clarify current code.
+Better character classes
 
 Ideas:
 

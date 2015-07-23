@@ -1,0 +1,57 @@
+module Data (
+  Seq(..),
+  
+  Vector(),
+  emptyVector
+)
+
+/**
+ * A sequence is a relationship between a collection and means of iteration over it.
+ */
+class Seq col itt {
+  !! : &(col a) -> Int -> a
+  // TODO declare !! as operator
+  first : &(col a) -> itt a
+  length &(col a) -> Int
+  :: : // HERE figure out whether collections are passed by reference or by value (value if they use the heap for storage?)
+  :+ 
+
+  next : itt a -> itt a
+  prev : itt a -> itt a
+  get : itt a -> a
+
+  // default implementations  
+  &col !! i = {
+    repeat itt at = if at == i then itt else repeat (next itt) (at+1)
+    get $ repeat 0 $ first &col
+  }
+  
+  length = size
+}
+
+data VectorIterator a = VectorIterator &(Vector a) Int
+
+data Vector a = Vector {
+  storage : HeapArray a
+}
+
+instance Seq Vector VectorIterator {
+  first v = VectorIterator v
+  
+  next (VectorIterator vref i) = VectorIterator vref (i + 1)
+  prev (VectorIterator vref i) = VectorIterator vref (i - 1)
+  get (VectorIterator vref i) = vref !! i
+  
+  &Vector {storage=s} !! i = op s
+}
+
+emptyVector = Vector { storage : createMemoryMap () }
+
+growVector &v by == ...
+
+length : &Vector a -> Int
+length &Vector {storage=s} = (elementsOf s)
+
+data ListIterator 
+instance Seq []
+

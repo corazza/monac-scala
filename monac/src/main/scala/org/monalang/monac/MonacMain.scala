@@ -2,6 +2,7 @@ package org.monalang.monac
 
 import java.io.{BufferedReader, FileReader}
 
+import org.monalang.monac.common.util.Reader
 import org.monalang.monac.front._
 import org.monalang.monac.iface.CompileOptions
 
@@ -13,4 +14,6 @@ object MonacMain extends App {
   println(lexer.tokenStream.takeWhile(_ != EndOfSource).toList)
 
   val parser = new Parser()
+
+  println(Reader.readWhole(getClass().getResourceAsStream("/standard-library/runtime.mona")))
 }

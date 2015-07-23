@@ -11,7 +11,7 @@ import OptionName._
 
 /* 
  * NOTE currently there is a 1-1 correspondence between command-line arguments
- * and compile options, I should parse parameterMap -> optionMap, and return from
+ * and compile options, Should parse parameterMap -> optionMap, and return from
  * optionMap
  */
 case class CompileOptions(

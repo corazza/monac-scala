@@ -2,20 +2,20 @@ package org.monalang.monac.front
 
 import java.io.BufferedReader
 
-import scala.collection.mutable.Queue
-
 class Lexer(inputStream: BufferedReader) {
   import Recognizer._
 
-  private val tokenQueue = new Queue[Token]()
-  private var rows = 1
-  private var columns = 1
-  private var atEnd = false
   private var current = inputStream.read().asInstanceOf[Char]
   private var next = inputStream.read().asInstanceOf[Char]
+  private var rows = 1
+  private var columns = 1
+  /* When a character causes a break after which a lexeme is recognized, the stream doesn't advanced but returns to
+   * this character in the next iteration.
+   */
   private var readNext = true
   private var blockCommentCount = 0
   private var lineComment = false
+  private var atEnd = false
 
   /**
    * Returns the next token from the inputStream.
@@ -24,10 +24,10 @@ class Lexer(inputStream: BufferedReader) {
    * the only argument.
    */
   private def getNextToken(): Token = {
+    var result: Token = null
     var buffer = new StringBuilder("")
     var advancing = true
     var innerRecognizers = collection.mutable.Map(recognizers.toSeq: _*)
-
     var didNotAcceptLast = true
     var rowsBegin = rows
     var columnsBegin = columns
@@ -47,8 +47,10 @@ class Lexer(inputStream: BufferedReader) {
           val accepted = accepting.head
           val lexeme = new ValueLexeme(rowsBegin, columnsBegin, buffer.toString)
           val construction = innerRecognizers.get(accepted).get
-          tokenQueue += construction(lexeme)
+          result = construction(lexeme)
+          // stop reading the current lexeme
           advancing = false
+          // next call continues from this character
           readNext = false
         } else {
           val notBroken = innerRecognizers.keys.filter(_.phase == FSAPhase.Continuing).toList
@@ -72,19 +74,15 @@ class Lexer(inputStream: BufferedReader) {
         }
       }
 
+      // if the current character did not break and a new token wasn't constructed
       if (readNext) {
-        var addBreak = false
         if (current == '\n') {
-          addBreak = true
           lineComment = false
           rows += 1
           columns = 0
         } else {
           columns += 1
         }
-
-        if (addBreak && (tokenQueue.nonEmpty && tokenQueue.last != InsertedBreakStatement || tokenQueue.isEmpty))
-          tokenQueue += InsertedBreakStatement
 
         var skip = false
         if (current == '*' && next == '/' && blockCommentCount > 0) {
@@ -99,13 +97,13 @@ class Lexer(inputStream: BufferedReader) {
         if (current == (-1).asInstanceOf[Char]) {
           advancing = false
           atEnd = true
-          tokenQueue += EndOfSource
+          result = EndOfSource
         }
       } else readNext = true
     }
 
     recognizers.keys.foreach(_.reset())
-    tokenQueue.dequeue()
+    result
   }
 
   /**

@@ -19,7 +19,7 @@ class LexerSpec extends FlatSpec {
     val lexer = new Lexer(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(inputString.getBytes()), "ISO-8859-1")))
 
     val correctTokens = List[Token](
-      StatementType(SyntacticLexeme(2, 6)), StatementType(SyntacticLexeme(2, 8)), SemiColon(SyntacticLexeme(2, 9)),
+      DoubleColon(SyntacticLexeme(2, 6)), DoubleColon(SyntacticLexeme(2, 8)), SemiColon(SyntacticLexeme(2, 9)),
       LowerId(ValueLexeme(3, 6, "/=")),
       LowerId(ValueLexeme(4, 6, "this")), LowerId(ValueLexeme(4, 11, "is")), LowerId(ValueLexeme(4, 14, "::")), UpperId(ValueLexeme(4, 17, "Test")),
       FloatNumeral(ValueLexeme(4, 22, "-    9.99")), IntegerNumeral(ValueLexeme(4, 32, "000")), IntegerNumeral(ValueLexeme(4, 36, "-100")), IntegerNumeral(ValueLexeme(4, 41, "9")),
@@ -28,13 +28,16 @@ class LexerSpec extends FlatSpec {
       OpenBlock(SyntacticLexeme(7, 6)), StringLiteral(ValueLexeme(7, 8, "\"another, test\"")), CloseBlock(SyntacticLexeme(7, 24)),
       CharacterLiteral(ValueLexeme(7, 26, "'a'")), CharacterLiteral(ValueLexeme(7, 30, """'\n'""")), CharacterLiteral(ValueLexeme(7, 35, """'\A'""")))
 
-    val output = lexer.tokenStream.takeWhile(_ != EndOfSource).toList.filter(_ != InsertedBreakStatement)
+    val output = lexer.tokenStream.takeWhile(_ != EndOfSource).toList.filter(_ match {
+      case t: Newlines => false
+      case _ => true
+    })
     val pairs = output zip correctTokens
 
     pairs foreach { pair =>
       // check position and content of lexemes
-      val correct = pair._1
-      val token = pair._2
+      val token = pair._1
+      val correct = pair._2
       assert(token == correct)
     }
   }
@@ -42,11 +45,11 @@ class LexerSpec extends FlatSpec {
 
 class LexerStaticSpec extends FlatSpec {
   "Lexer" should "strip single quotation marks from a string literal" in {
-    assert(LexerConversions.lexemeToStringLiteral("\"test\"") == "test")
+    assert(LexerConversions.lexemeToStringLiteral("\"test\"") == "standard-library/test")
   }
 
   it should "strip triple quotation marks from a string literal" in {
-    assert(LexerConversions.lexemeToStringLiteral("\"\"\"test\"\"\"") == "test")
+    assert(LexerConversions.lexemeToStringLiteral("\"\"\"test\"\"\"") == "standard-library/test")
   }
 
   it should "convert a numeral literal into an internal representation" in {

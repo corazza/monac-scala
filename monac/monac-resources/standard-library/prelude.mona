@@ -1,0 +1,47 @@
+import IO( printStr )
+import Runtime( heapAllocate
+
+/**
+ * Implicitly imported unqualified in all other modules.
+ */
+module Prelude (
+  String,
+  []([]),
+  
+  Show,
+  
+  zip
+)
+
+// types
+
+data [] a = [] | List a (List a)
+
+type String = [Char]
+
+// type classes
+
+class Show a {
+ show : a -> String
+ 
+ print : a -> ()
+ print object = printStr $ show object + '\n'
+}
+
+
+// functions
+
+zip : (Vector a b) => a -> b -> [(a, b)]
+
+map : (a -> b) -> &[a] -> [b]
+map _ &[] = []
+map f &(x::xs) = (f x)::(map f &xs)
+
+curry = 
+uncurry = 
+
+// system
+
+new = heapAllocate
+error = ???
+

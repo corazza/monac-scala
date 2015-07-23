@@ -8,28 +8,24 @@ case class Union(left: Node, right: Node) extends Node
 case class Cat(first: Node, second: Node) extends Node
 case class Lit(lit: Char) extends Node
 case class Not(c: Char) extends Node
+case object Whichever extends Node
 
 // classes (nonenumerated)
 case object Letter extends Node
 case object Digit extends Node
-
 case object Id extends Node
-
 case object NonId extends Node
 case object Unicode extends Node
 
 // specific characters
-case object Newline extends Node
-case object Period extends Node
-case object Opening extends Node
-case object Closing extends Node
-case object Vertical extends Node
-case object Star extends Node
-case object Space extends Node
-
-case object Tab extends Node
-
-case object Whichever extends Node
+case object NewlineCharacter extends Node
+case object PeriodCharacter extends Node
+case object OpeningCharacter extends Node
+case object ClosingCharacter extends Node
+case object VerticalCharacter extends Node
+case object AsteriskCharacter extends Node
+case object SpaceCharacter extends Node
+case object TabCharacter extends Node
 
 class Regex(val first: Node) {
   override def toString = first.toString
@@ -95,14 +91,14 @@ object Regex {
         case 'N' => operands.push(NonId)
         case 'U' => operands.push(Unicode)
         case 'A' => operands.push(Whichever)
-        case 'O' => operands.push(Opening)
-        case 'C' => operands.push(Closing)
-        case 'V' => operands.push(Vertical)
-        case 'K' => operands.push(Star)
-        case 'S' => operands.push(Space)
-        case 'T' => operands.push(Tab)
-        case 'E' => operands.push(Newline)
-        case 'P' => operands.push(Period)
+        case 'O' => operands.push(OpeningCharacter)
+        case 'C' => operands.push(ClosingCharacter)
+        case 'V' => operands.push(VerticalCharacter)
+        case 'K' => operands.push(AsteriskCharacter)
+        case 'S' => operands.push(SpaceCharacter)
+        case 'T' => operands.push(TabCharacter)
+        case 'E' => operands.push(NewlineCharacter)
+        case 'P' => operands.push(PeriodCharacter)
         case c: Char => operands.push(Lit(c))
       }
     }

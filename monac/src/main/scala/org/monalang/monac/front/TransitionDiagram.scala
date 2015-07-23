@@ -58,7 +58,7 @@ class TransitionDiagram(val matrix: ArrayBuffer[ArrayBuffer[Char]], val finalSta
         c == transition ||
         c == TransitionDiagram.LetterTransition && Recognizer.letter.contains(transition) ||
         c == TransitionDiagram.DigitTransition && Recognizer.digit.contains(transition) ||
-        c == TransitionDiagram.IdTransition && Recognizer.id.contains(transition) ||
+        c == TransitionDiagram.IdTransition && Recognizer.operator.contains(transition) ||
         c == TransitionDiagram.NonIdTransition && Recognizer.nonid.contains(transition) ||
         c == TransitionDiagram.UnicodeTransition && CharUtil.isUnicode(transition)
 

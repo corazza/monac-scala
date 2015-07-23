@@ -1,10 +1,12 @@
-package org.monalang.monac.front
+package org.monalang.monac.common.util
 
 import java.io.InputStream
 
 // TODO docs
 
 object Reader {
+  def readWhole(inputStream: InputStream) = readUntil(inputStream, (-1).asInstanceOf[Char])
+
   def readUntil(inputStream: InputStream, stop: Char) = {
     val result = new StringBuilder("")
     Reader.read(inputStream, { c =>

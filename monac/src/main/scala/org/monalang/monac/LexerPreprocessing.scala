@@ -21,7 +21,6 @@ object LexerPreprocessing extends App {
 
   // write to file
   val writer = new PrintWriter(new File(this.getClass().getResource("/expressions").getPath()))
-  println(this.getClass().getResource("/expressions").getPath())
   writer.write(expressions.toString)
   writer.flush()
   writer.close()

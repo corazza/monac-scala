@@ -1,0 +1,7 @@
+module Runtime (
+)
+
+
+// TODO HeapAllocated, which would be an instance of Destructable
+heapAllocate : a -> &a
+
