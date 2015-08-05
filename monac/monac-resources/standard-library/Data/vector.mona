@@ -1,0 +1,49 @@
+import Data( Collection(..), Seq(..) )
+
+/**
+ * Resizeable container that allocates elements on the heap.
+ */
+module Data.Vector (
+    Vector(),
+    emptyVector
+)
+
+
+data VectorIterator a = VectorIterator &(Vector a) Int // what's the lifetime of #1?
+
+data Vector a = Vector {
+    storage     : Unique a
+    size        : Int
+    capacity    : Int
+}
+
+instance Iterable Vector VectorIterator {
+    
+}
+
+instance Seq Vector VectorIterator {
+
+}
+
+instance Collection Vector {
+    size = ???
+    
+    (ref vec) `elem` (ref elem) = {
+        
+    }
+}
+
+instance Seq Vector VectorIterator {
+    first v = VectorIterator v
+
+    next (VectorIterator vref i) = VectorIterator vref (i + 1)
+    prev (VectorIterator vref i) = VectorIterator vref (i - 1)
+    get (VectorIterator vref i) = vref !! i
+
+    &Vector {storage=s} !! i = op s
+}
+
+emptyVector = Vector { storage = createMemoryMap (), capacity = defaultVectorCapacity }
+
+growVector &v by == ...
+

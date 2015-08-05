@@ -1,47 +1,64 @@
 import IO( printStr )
-import Runtime( heapAllocate
+import Runtime( heapAllocate )
+import Essential
 
 /**
  * Implicitly imported unqualified in all other modules.
  */
 module Prelude (
-  String,
-  []([]),
-  
-  Show,
-  
-  zip
+    module Essential,
+
+    String,
+    HA,
+    HS.
+
+    Show(..),
+
+    zip,
+    map,
+    curry,
+    uncurry,
+    new,
+    error
 )
 
-// types
-
-data [] a = [] | List a (List a)
-
-type String = [Char]
-
-// type classes
 
 class Show a {
- show : a -> String
- 
- print : a -> ()
- print object = printStr $ show object + '\n'
+     show : ref a -> String
+     
+     print : ref a -> ()
+     print object = printStr $ show object + '\n'
 }
 
 
-// functions
+type HA = HeapAllocated
+type HS = HeapArray
+
+
+infixr 0 $
+($) : (a -> b) -> a -> b
+f $ x = f x
 
 zip : (Vector a b) => a -> b -> [(a, b)]
 
+// TODO convert to reference semantics
 map : (a -> b) -> &[a] -> [b]
-map _ &[] = []
+map _ &[] = [] // just remove &
 map f &(x::xs) = (f x)::(map f &xs)
 
-curry = 
-uncurry = 
+curry : ((a, b) -> c) -> (a -> b -> c)
+curry = ???
 
-// system
+uncurry = ???
+
+fst (ref (a, _)) = ref a
+snd (ref (_, a)) = ref a
 
 new = heapAllocate
+
+// TODO define in Runtime
 error = ???
 
+// TODO fixity declaration for |>
+(|>) : a -> (a -> b) -> b
+x |> f = f x
