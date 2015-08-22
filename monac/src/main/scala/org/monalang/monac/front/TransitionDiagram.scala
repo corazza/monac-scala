@@ -54,12 +54,12 @@ class TransitionDiagram(val matrix: ArrayBuffer[ArrayBuffer[Char]], val finalSta
     // TODO test support for other languages and unicode symbols
 
     def matchesTransition(c: Char): Boolean =
-      c == TransitionDiagram.AnyTransition && !Recognizer.without(Recognizer.whitespace, '\u0020').contains(transition) ||
+      c == TransitionDiagram.AnyTransition && !Recognizer.without(Recognizer.LiteralCharacters.whitespace, '\u0020').contains(transition) ||
         c == transition ||
-        c == TransitionDiagram.LetterTransition && Recognizer.letter.contains(transition) ||
-        c == TransitionDiagram.DigitTransition && Recognizer.digit.contains(transition) ||
-        c == TransitionDiagram.IdTransition && Recognizer.operator.contains(transition) ||
-        c == TransitionDiagram.NonIdTransition && Recognizer.nonid.contains(transition) ||
+        c == TransitionDiagram.LetterTransition && Recognizer.LiteralCharacters.letter.contains(transition) ||
+        c == TransitionDiagram.DigitTransition && Recognizer.LiteralCharacters.digit.contains(transition) ||
+        c == TransitionDiagram.IdTransition && Recognizer.LiteralCharacters.id.contains(transition) ||
+        c == TransitionDiagram.NonIdTransition && Recognizer.LiteralCharacters.nonid.contains(transition) ||
         c == TransitionDiagram.UnicodeTransition && CharUtil.isUnicode(transition)
 
     val result = (matrix(state) zipWithIndex) filter (_ match {

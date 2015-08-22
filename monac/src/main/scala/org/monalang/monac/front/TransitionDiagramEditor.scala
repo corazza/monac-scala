@@ -187,54 +187,6 @@ object TransitionDiagramEditor {
       result
     }
 
-    case NewlineCharacter => {
-      val result = TransitionDiagram(2)
-      result.addTransition(0, 1, '\n')
-      result
-    }
-
-    case PeriodCharacter => {
-      val result = TransitionDiagram(2)
-      result.addTransition(0, 1, '.')
-      result
-    }
-
-    case OpeningCharacter => {
-      val result = TransitionDiagram(2)
-      result.addTransition(0, 1, '(')
-      result
-    }
-
-    case ClosingCharacter => {
-      val result = TransitionDiagram(2)
-      result.addTransition(0, 1, ')')
-      result
-    }
-
-    case VerticalCharacter => {
-      val result = TransitionDiagram(2)
-      result.addTransition(0, 1, '|')
-      result
-    }
-
-    case AsteriskCharacter => {
-      val result = TransitionDiagram(2)
-      result.addTransition(0, 1, '*')
-      result
-    }
-
-    case SpaceCharacter => {
-      val result = TransitionDiagram(2)
-      result.addTransition(0, 1, ' ')
-      result
-    }
-
-    case TabCharacter => {
-      val result = TransitionDiagram(2)
-      result.addTransition(0, 1, '\u0009')
-      result
-    }
-
     case Union(left, right) => {
       val leftDiag = eval(left)
       val rightDiag = eval(right)

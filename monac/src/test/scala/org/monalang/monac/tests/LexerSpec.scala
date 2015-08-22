@@ -45,11 +45,11 @@ class LexerSpec extends FlatSpec {
 
 class LexerStaticSpec extends FlatSpec {
   "Lexer" should "strip single quotation marks from a string literal" in {
-    assert(LexerConversions.lexemeToStringLiteral("\"test\"") == "standard-library/test")
+    assert(LexerConversions.lexemeToStringLiteral("\"test\"") == "src/main/mona/standard-library/test")
   }
 
   it should "strip triple quotation marks from a string literal" in {
-    assert(LexerConversions.lexemeToStringLiteral("\"\"\"test\"\"\"") == "standard-library/test")
+    assert(LexerConversions.lexemeToStringLiteral("\"\"\"test\"\"\"") == "src/main/mona/standard-library/test")
   }
 
   it should "convert a numeral literal into an internal representation" in {

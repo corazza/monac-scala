@@ -17,16 +17,6 @@ case object Id extends Node
 case object NonId extends Node
 case object Unicode extends Node
 
-// specific characters
-case object NewlineCharacter extends Node
-case object PeriodCharacter extends Node
-case object OpeningCharacter extends Node
-case object ClosingCharacter extends Node
-case object VerticalCharacter extends Node
-case object AsteriskCharacter extends Node
-case object SpaceCharacter extends Node
-case object TabCharacter extends Node
-
 class Regex(val first: Node) {
   override def toString = first.toString
 }
@@ -39,17 +29,6 @@ class Regex(val first: Node) {
  * I - id (special ASCII, operator)
  * N - nonid
  * U - unicode (rest)
- *
- * specific characters:
- * P - period
- * E - newline
- * O - open parens
- * C - closing parens
- * V - vertical line
- * K - asterisk
- * S - space
- * T - tabulator
- *
  * A - any character except newline or tab or CR
  */
 object Regex {
@@ -91,15 +70,7 @@ object Regex {
         case 'N' => operands.push(NonId)
         case 'U' => operands.push(Unicode)
         case 'A' => operands.push(Whichever)
-        case 'O' => operands.push(OpeningCharacter)
-        case 'C' => operands.push(ClosingCharacter)
-        case 'V' => operands.push(VerticalCharacter)
-        case 'K' => operands.push(AsteriskCharacter)
-        case 'S' => operands.push(SpaceCharacter)
-        case 'T' => operands.push(TabCharacter)
-        case 'E' => operands.push(NewlineCharacter)
-        case 'P' => operands.push(PeriodCharacter)
-        case c: Char => operands.push(Lit(c))
+        case c: Char => operands.push(Lit(Recognizer.specialCharacters.getOrElse(c, c)))
       }
     }
 

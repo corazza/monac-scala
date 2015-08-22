@@ -41,7 +41,7 @@ class FSA(val transitions: TransitionDiagram, val startingState: Int, val fromEx
 
     r.toString
 
-    //    fromExpression
+    fromExpression
   }
 }
 
