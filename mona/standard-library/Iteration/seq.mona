@@ -1,0 +1,29 @@
+/// An ordered sequence of elements.
+/// 
+/// Guarantees constant order of access.
+
+class (Collection seq) => Seq seq {
+	seqIter : SeqIterator itt => &seq a -> itt a
+
+	length : &seq a -> Int
+	// TODO default implementation
+
+    infixl 9 !!
+	!!     : &seq a -> Int -> OptionLend a
+	
+    infixr 5 ++
+	++ : (Build seq _, Clone a) => &seq a -> &seq a -> seq a
+	
+	infixl 5 :+
+ 	:+ : (Build seq _, Clone a) => &seq a -> &a -> seq a
+
+    infixr 5 +:
+	+: : (Build seq _, Clone a) => &a -> &seq a -> seq a
+	
+	let lazy length = size
+}
+
+class Iterator itt => SeqIterator itt {
+	prev : &mut itt a -> OptionLend a
+}
+

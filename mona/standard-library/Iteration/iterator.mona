@@ -1,0 +1,21 @@
+class (Traversable itt, Copy itt) => Iterator itt {
+	next : &mut itt a -> OptionLend a
+}
+
+
+data Map b = Iterator itt => Map (&a -> b) (itt a)
+
+instance Iterator Map {
+	next (Map f itt) = f (next itt)
+}
+
+data Filter a = Iterator itt => Filter (&a -> Bool) (itt a)
+
+instance Iterator Filter {
+	next f@(Filter p itt) = match next itt {
+		case None -> None,
+		case Some a | p a       -> Some a
+		            | otherwise -> next f
+	}
+}
+

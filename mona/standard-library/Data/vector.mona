@@ -1,0 +1,53 @@
+/// Dynamic random access container that allocates elements on the heap.
+module Data.Vector (
+    Vector()
+)
+
+
+data Vector a = Vector {
+    storage     : Unique a
+    size        : Int
+    capacity    : Int
+}
+
+instance Traversable Vector {
+	iter v = VectorIterator v 0
+}
+
+instance Collection Vector {
+	size Vector { size = vsize } = vsize
+}
+
+instance Seq Vector {
+	let seqIter = iter
+	let length = size
+}
+
+instance Build Vector Vector {
+	let emptyBuilder = VectorBuilder . emptyVector	
+	result v = v
+}
+
+data VectorIterator a = VectorIterator (&Vector a) Int
+
+instance Iterator VectorIterator {
+	next (VectorIterator v i) = 
+		if i < size v then {
+			if i = -1 then i = 0
+			// unsafe access to v
+			let &e = ???
+			i += 1
+			SomeLend e
+		} else NoneLend
+}
+
+instance SeqIterator VectorIterator {
+	prev (VectorIterator v i) = 
+		if i > 0 then {
+			if i = size v then i -= 1
+			let &e = ???
+			i -= 1
+			SomeLend e
+		} else NoneLend
+}
+

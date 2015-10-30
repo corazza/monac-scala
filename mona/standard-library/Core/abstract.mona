@@ -1,0 +1,5 @@
+module Core.Abstract
+
+data Raw a = ??? deriving (Copy, Show, Deref, DerefMut)
+
+// TODO Int etc

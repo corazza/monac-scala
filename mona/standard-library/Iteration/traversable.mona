@@ -1,0 +1,30 @@
+module Iteration
+
+
+class Traversable coi {
+	/// for collections: returns iterator starting from first element
+	/// for iterators: returns copy of current iterator with state
+	/// iterator invalidation is unnecessary since iterator immutably borrow their collections
+	iter : Iterator itt => &coi a -> itt a
+	
+	map : (&a -> b) -> &coi a -> Map b
+	map f coi = Map f (iter coi)
+
+	filter : (&a -> Bool) -> &coi a -> Filter b
+	filter p coi = Filter p (iter coi)
+	
+	// it would be better of folds were implemented through something like TraversableBuilder
+	// in order to enable lazy iteration
+	foldr : (&a -> &mut b -> ()) -> b -> coi a -> b
+	foldr f z coi = match next $ iter coi {
+		NoneLend   -> z
+		SomeLend a -> f a (foldr f z coi)
+	}
+	
+	foldl : (&mut b -> &a -> ()) -> b -> coi a -> b
+	foldl f z coi = match next $ iter coi {
+		NoneLend   -> z
+		SomeLend a -> foldl f (f z a) coi
+	}
+}
+

@@ -1,0 +1,27 @@
+module Iteration
+
+
+/// A collection of items that can be iterated over.
+class Traversible col => Collection col {
+	size    : &col a -> Int
+	in      : &col a -> &a -> Bool
+	isEmpty : &col a -> Bool
+
+	size xs = {
+		let mut n = 0
+		xs `foreach` { \ _ -> n += 1 }
+		n
+	}
+
+	isEmpty xs = size xs == 0
+
+	x `in` xs = {
+		inner itt = match next itt {
+			NoneBorrow -> False,
+			SomeBorrow e | x == e    -> True
+			             | otherwise -> inner itt
+		}
+		inner $ iter xs
+	}
+}
+

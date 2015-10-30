@@ -1,0 +1,29 @@
+module Data.List (
+	[](..),
+)
+
+import qualified Data.Vector as V
+
+
+infixr 5 ::
+data [a] = a :: [a] | []
+
+instance Traversible [] {
+	iter xs = ListIterator xs
+}
+
+data ListIterator a = ListIterator &[a]
+
+instance Iterator ListIterator {
+	next (ListIterator [])    = NoneBorrow
+	next (ListIterator x::xs) = SomeBorrow x
+}
+
+data ListBuilder a = ListBuilder (Vector a)
+
+instance Build [] ListBuilder {
+	let emptyBuilder = ListBuilder . emptyBuilder
+	
+	(ListBuilder v) `add` x = v V.+= x
+}
+

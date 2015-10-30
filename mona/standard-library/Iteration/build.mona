@@ -1,0 +1,14 @@
+/// An efficient builder (rep -> res) exists.
+class Build res rep {
+	empty  : () -> rep in
+	add    : &mut rep in -> in -> ()
+	result : rep in -> res out
+
+	collect : (Iterator itt, Clone a) => itt a -> res a
+	collect xs = {
+		let mut builder = empty ()		
+		xs `foreach` (builder `add` (clone _))
+		result builder
+	}
+}
+

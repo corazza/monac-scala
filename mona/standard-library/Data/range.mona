@@ -1,0 +1,27 @@
+/// Uses Haskell range syntax as constructor
+module Data.Range( Range() )
+
+
+data Range = Range Int Int Int
+
+instance IntoIterator Range {
+	iter (Range first last step) = RangeIterator r step
+}
+
+instance Collection Range {
+	size (Range first last step) = (last - first) `div` step + 1
+	x `in` (Range first last step) = ???
+	isEmpty r = False
+}
+
+data RangeIterator a = RangeIterator (&Range a) Int deriving (IntoIterator)
+
+instance Iterator RangeIterator {
+	next (RangeIterator (Range first last step) current) = 
+		if current < last then {
+			let last = current
+			current += step
+			Some last
+		} else None
+}
+

@@ -1,0 +1,92 @@
+module Core.Allocation (
+    Deref(..), DerefMut(..),
+    Destruct(..),
+
+    Unique(..),
+    Box(), box
+)
+
+
+class Deref a {
+    deref : &a b -> &b
+}
+
+class DerefMut a {
+    derefMut : &mut a b -> &mut b
+}
+
+class Destruct a {
+    destruct : mut a -> ()
+}
+
+
+// Raw a declared in runtime/abstract.mona
+
+instance Deref Raw {
+    deref &raw = ???
+}
+
+instance DerefMut Raw {
+    derefMut &mut raw = ???
+}
+
+data Unique a = Unique (Raw a)
+
+instance Deref Unique {
+    deref (& Unique raw) = & *raw
+}
+
+instance DerefMut Unique {
+    derefMut (&mut Unique raw) = &mut *raw
+}
+
+data Box a = Box (Unique a)
+
+instance Deref Box {
+    deref (&Box unique) = & *unique
+}
+
+instance DerefMut Box {
+    derefMut (&mut Box unique) = &mut *unique
+}
+
+instance Destructible Box {
+    destruct (&mut Box unique) = {
+        destruct *unique
+        free *unique
+    }
+}
+
+
+offset : Raw a -> Int -> Raw a
+offset r by = ???
+
+free : Raw a -> ()
+free = ???
+
+malloc : Int -> Raw a
+malloc = ???
+
+// rationalization: source loses ownership, box acquires it
+memcpy : &mut Box a -> a -> Int -> ()
+memcpy (&mut dest) source size = ???
+
+/**
+ * Returns size of object x in bytes.
+ */
+sizeOf : &a -> Int
+sizeOf &x = ???
+
+// TODO forbid boxing boxes
+box : a -> Box a
+box x = {
+    // ambiguous type `Raw a` remains
+    let raw = malloc $ sizeOf x
+    let mut inner_box = Box (Unique raw)
+
+    // copy and typecast inner_box
+    memcpy inner_box x $ sizeOf x
+
+    inner_box
+}
+

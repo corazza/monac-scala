@@ -1,0 +1,98 @@
+import IO( printStr )
+import Runtime( Box, box )
+import Data.Collection
+
+/// Implicitly imported unqualified in all other modules.
+module Prelude (
+    module Data.Collection
+
+    String,
+    Box, box
+
+    Show(..),
+
+    zip,
+    map,
+    curry,
+    uncurry,
+    new,
+    error
+)
+
+
+class Eq a {
+	infix == 4
+	== : &a -> &a -> Bool
+
+	infix /= 4
+	/= : &a -> &a -> Bool
+
+	a == b = not $ a /= b
+	a /= b = not $ a == b
+}
+
+// Int, UInt, Float (U/Int defaults to 32 bits, Float to 64)
+// Int32, Int64, UInt32, UInt64, Float32, Float64
+class Num a {
+    + : (Copy a) => a -> a -> a
+    - : (Copy a) => a -> a -> a
+    * : (Copy a) => a -> a -> a
+    / : (Copy a) => a -> a -> a
+}
+
+class Show a {
+     show : &a -> String
+}
+
+
+data Bool = False | True
+    deriving (Eq, Copy, Show)
+
+data Option a = Some a | None
+data OptionLend a = SomeLend &a | NoneLend
+
+type Int = Int32
+type Float = Float64
+
+type Seq col => [a] = col a
+type String = [Char]
+
+
+let otherwise = True
+
+not True  = False
+not False = True
+
+infixr 0 $
+($) : (a -> b) -> a -> b
+f $ x = f x
+
+zip : &[a] -> &[b] -> [(a, b)]
+zip = ???
+
+map : (&a -> b) -> &[a] -> [b]
+map _ [] = []
+map f &x::xs = (f x)::(map f xs)
+
+curry : ((a, b) -> c) -> (a -> b -> c)
+curry f = \x -> \y -> f x y
+
+uncurry : (a -> b -> c) -> ((a, b) -> c)
+uncurry = \(x, y) -> f x y
+
+fst &(a, _) = &a
+snd &(_, a) = &a
+
+infixl 0 |>
+|> : &a -> (&a -> b) -> b
+&x |> f = f x
+
+foreach : Traversable itt => &itt a -> (&a -> ()) -> ()
+xs `foreach` f = {
+    ???
+}
+
+// TODO convert to stream
+// print << "string" << 123
+print s = printStr $ s ++ '\n'
+

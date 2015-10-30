@@ -1,3 +1,7 @@
+module IO
+
+// doesn't append a newline
+// see print in Prelude, which does
 printStr : String -> ()
 printStr = ...
 
