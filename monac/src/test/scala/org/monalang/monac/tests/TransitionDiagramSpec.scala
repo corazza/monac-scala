@@ -1,8 +1,8 @@
 package org.monalang.monac.tests
 
-import org.monalang.monac.front.Lexer
-import org.monalang.monac.front.Regex
-import org.monalang.monac.front.TransitionDiagramEditor
+import org.monalang.monac.lexing.Lexer
+import org.monalang.monac.lexing.Regex
+import org.monalang.monac.lexing.TransitionDiagramEditor
 import org.scalatest.FlatSpec
 
 class TransitionDiagramSpec extends FlatSpec {

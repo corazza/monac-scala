@@ -1,4 +1,4 @@
-package org.monalang.monac.front
+package org.monalang.monac.lexing
 
 import java.io.BufferedReader
 

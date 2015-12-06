@@ -1,4 +1,4 @@
-package org.monalang.monac.front
+package org.monalang.monac.lexing
 
 /**
  * FSA recognizers used by the lexer, character classes enumeration.
@@ -61,11 +61,17 @@ object Recognizer {
     FSA("PP") -> doublePeriod _,
     FSA(",") -> comma _,
     FSA(";") -> semicolon _,
+    FSA("@") -> at _,
+    FSA("_") -> underscore _,
+    FSA("&") -> ampersand _,
+    FSA("\\") -> backslash _,
     FSA("EE*") -> newlines _,
 
     // identifiers and lookalike purely syntactic elements
-    FSA("L(L|D)*'*") -> regularIdentifier _,
+    FSA("L(L|D)*'*") -> regularIdentifierOrKeyword _,
     FSA("(I|U)(I|U)*") -> special _)
+
+  val keywords = List("data", "class")
 
   // construction functions
   def integerNumeral(lexeme: ValueLexeme): Token = IntegerNumeral(lexeme)
@@ -82,11 +88,16 @@ object Recognizer {
   def doublePeriod(lexeme: ValueLexeme) = DoublePeriod(lexeme.toSyntactic)
   def comma(lexeme: ValueLexeme) = Comma(lexeme.toSyntactic)
   def semicolon(lexeme: ValueLexeme) = SemiColon(lexeme.toSyntactic)
+  def at(lexeme: ValueLexeme) = At(lexeme.toSyntactic)
+  def underscore(lexeme: ValueLexeme) = Underscore(lexeme.toSyntactic)
+  def ampersand(lexeme: ValueLexeme) = Ampersand(lexeme.toSyntactic)
   def newlines(lexeme: ValueLexeme) = Newlines(lexeme.toSyntactic)
+  def backslash(lexeme: ValueLexeme) = BeginLambda(lexeme.toSyntactic)
 
-  def regularIdentifier(lexeme: ValueLexeme): Token = {
-    if (lexeme.data(0).isLower) LowerId(lexeme)
-    else UpperId(lexeme)
+  def regularIdentifierOrKeyword(lexeme: ValueLexeme): Token = {
+    if (keywords.contains(lexeme.data)) Keyword(lexeme)
+    else if (lexeme.data(0).isLower)    LowerId(lexeme)
+    else                                UpperId(lexeme)
   }
 
   /**

@@ -1,4 +1,4 @@
-package org.monalang.monac.front
+package org.monalang.monac.lexing
 
 import FSAPhase.Accepting
 import FSAPhase.Broken

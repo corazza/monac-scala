@@ -1,8 +1,6 @@
-package org.monalang.monac.front
+package org.monalang.monac.symbol
 
-import scala.collection.mutable.ArrayBuffer
-import org.monalang.monac.types.TypeConstructor
-import org.monalang.monac.types.ConcreteType
+import org.monalang.monac.types.{ConcreteType, TypeConstructor}
 
 // entities that can be referred to through source code
 abstract class Symbol

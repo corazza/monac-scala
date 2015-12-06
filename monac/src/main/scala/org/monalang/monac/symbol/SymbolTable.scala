@@ -1,4 +1,4 @@
-package org.monalang.monac.front
+package org.monalang.monac.symbol
 
 class SymbolTable(parent: Option[SymbolTable]) {
   val lookupTable = collection.mutable.Map[String, Symbol]()

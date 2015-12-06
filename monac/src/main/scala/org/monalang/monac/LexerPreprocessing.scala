@@ -2,7 +2,7 @@ package org.monalang.monac
 
 import java.io.{File, PrintWriter}
 
-import org.monalang.monac.front._
+import org.monalang.monac.lexing._
 
 object LexerPreprocessing extends App {
   // create expressions from FSAs

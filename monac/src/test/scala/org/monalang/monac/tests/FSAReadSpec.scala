@@ -1,6 +1,6 @@
 package org.monalang.monac.tests
 
-import org.monalang.monac.front._
+import org.monalang.monac.lexing._
 import org.scalatest.FlatSpec
 
 class FSAReadSpec extends FlatSpec {

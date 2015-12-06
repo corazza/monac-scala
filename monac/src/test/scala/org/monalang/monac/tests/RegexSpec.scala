@@ -1,9 +1,9 @@
 package org.monalang.monac.tests
 
-import org.monalang.monac.front.Regex
+import org.monalang.monac.lexing.Regex
 
 import org.scalatest.FlatSpec
-import org.monalang.monac.front.FSA
+import org.monalang.monac.lexing.FSA
 
 class RegexSpec extends FlatSpec {
   "Regex" should "create a transition diagram from a regular expression" in {

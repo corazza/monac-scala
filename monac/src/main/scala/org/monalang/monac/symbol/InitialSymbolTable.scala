@@ -1,7 +1,6 @@
-package org.monalang.monac.front
+package org.monalang.monac.symbol
 
-import org.monalang.monac.types.IntATunsigned32
-import org.monalang.monac.types.CharAT
+import org.monalang.monac.types.{CharAT, IntATunsigned32}
 
 object InitialSymbolTable extends SymbolTable(None) {
   addSymbol("Int", ConcreteTypeName(IntATunsigned32))

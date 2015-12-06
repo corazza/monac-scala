@@ -1,4 +1,4 @@
-package org.monalang.monac.front
+package org.monalang.monac.lexing
 
 abstract class Token
 
@@ -36,10 +36,13 @@ case class Period(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 case class DoublePeriod(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 case class Comma(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 case class SemiColon(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
+case class At(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 case class DoubleColon(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 case class FunctionArrow(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
+case class BeginLambda(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 case class EqualsSign(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 case class Underscore(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
+case class Ampersand(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 case class Newlines(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 
 // identifiers
@@ -50,3 +53,6 @@ case class UpperId(lexeme: ValueLexeme) extends ValueToken(lexeme, lexeme.data)
 
 // virtual tokens (inserted)
 case object EndOfSource extends VirtualToken
+
+// keyword
+case class Keyword(lexeme: ValueLexeme) extends ValueToken(lexeme, lexeme.data)

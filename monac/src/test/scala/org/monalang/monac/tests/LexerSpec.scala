@@ -2,7 +2,7 @@ package org.monalang.monac.tests
 
 import java.io.{BufferedReader, ByteArrayInputStream, InputStreamReader}
 
-import org.monalang.monac.front._
+import org.monalang.monac.lexing._
 import org.scalatest.FlatSpec
 
 class LexerSpec extends FlatSpec {
@@ -45,11 +45,11 @@ class LexerSpec extends FlatSpec {
 
 class LexerStaticSpec extends FlatSpec {
   "Lexer" should "strip single quotation marks from a string literal" in {
-    assert(LexerConversions.lexemeToStringLiteral("\"test\"") == "src/main/mona/standard-library/test")
+    assert(LexerConversions.lexemeToStringLiteral("\"test\"") == "test")
   }
 
   it should "strip triple quotation marks from a string literal" in {
-    assert(LexerConversions.lexemeToStringLiteral("\"\"\"test\"\"\"") == "src/main/mona/standard-library/test")
+    assert(LexerConversions.lexemeToStringLiteral("\"\"\"test\"\"\"") == "test")
   }
 
   it should "convert a numeral literal into an internal representation" in {
