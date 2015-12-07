@@ -20,7 +20,7 @@ object Recognizer {
     val whitespace = "\u0020\u0009\u000D\u000A"
     val letter = makeRange('a', 'z') + makeRange('A', 'Z') + "_"
     val digit = "0123456789"
-    val id = "+=-/\\<>?V!#%^&~K$" // $ is an operator
+    val id = "+=-/\\<>?!#%^&~K$" // $ is an operator
     val nonid = "\"\'OC[]{}P,;`"
     // ' (apostrophe) is special as it can occur only at the end of identifiers
     // unicode characters which can be in identifiers (U) - defined by exclusion
@@ -64,6 +64,7 @@ object Recognizer {
     FSA("@") -> at _,
     FSA("_") -> underscore _,
     FSA("&") -> ampersand _,
+    FSA("|") -> vertical _,
     FSA("\\") -> backslash _,
     FSA("EE*") -> newlines _,
 
@@ -71,7 +72,12 @@ object Recognizer {
     FSA("L(L|D)*'*") -> regularIdentifierOrKeyword _,
     FSA("(I|U)(I|U)*") -> special _)
 
-  val keywords = List("data", "class")
+  val keywords = List("if"    -> KeywordData,
+                      "then"  -> KeywordThen,
+                      "else"  -> KeywordElse,
+                      "data"  -> KeywordData,
+                      "class" -> KeywordClass,
+                      "let"   -> KeywordLet) toMap
 
   // construction functions
   def integerNumeral(lexeme: ValueLexeme): Token = IntegerNumeral(lexeme)
@@ -91,11 +97,12 @@ object Recognizer {
   def at(lexeme: ValueLexeme) = At(lexeme.toSyntactic)
   def underscore(lexeme: ValueLexeme) = Underscore(lexeme.toSyntactic)
   def ampersand(lexeme: ValueLexeme) = Ampersand(lexeme.toSyntactic)
+  def vertical(lexeme: ValueLexeme) = Vertical(lexeme.toSyntactic)
   def newlines(lexeme: ValueLexeme) = Newlines(lexeme.toSyntactic)
   def backslash(lexeme: ValueLexeme) = BeginLambda(lexeme.toSyntactic)
 
   def regularIdentifierOrKeyword(lexeme: ValueLexeme): Token = {
-    if (keywords.contains(lexeme.data)) Keyword(lexeme)
+    if (keywords.contains(lexeme.data)) keywords(lexeme.data)(lexeme.toSyntactic)
     else if (lexeme.data(0).isLower)    LowerId(lexeme)
     else                                UpperId(lexeme)
   }

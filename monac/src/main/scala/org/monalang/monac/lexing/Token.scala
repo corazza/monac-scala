@@ -43,6 +43,7 @@ case class BeginLambda(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 case class EqualsSign(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 case class Underscore(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 case class Ampersand(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
+case class Vertical(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 case class Newlines(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 
 // identifiers
@@ -55,4 +56,11 @@ case class UpperId(lexeme: ValueLexeme) extends ValueToken(lexeme, lexeme.data)
 case object EndOfSource extends VirtualToken
 
 // keyword
-case class Keyword(lexeme: ValueLexeme) extends ValueToken(lexeme, lexeme.data)
+abstract class Keyword(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
+
+case class KeywordIf(lexeme: SyntacticLexeme) extends Keyword(lexeme)
+case class KeywordThen(lexeme: SyntacticLexeme) extends Keyword(lexeme)
+case class KeywordElse(lexeme: SyntacticLexeme) extends Keyword(lexeme)
+case class KeywordData(lexeme: SyntacticLexeme) extends Keyword(lexeme)
+case class KeywordClass(lexeme: SyntacticLexeme) extends Keyword(lexeme)
+case class KeywordLet(lexeme: SyntacticLexeme) extends Keyword(lexeme)
