@@ -12,14 +12,14 @@ class Context {
 
 }
 
+// TODO compute and cache ala FSA's
+
 class Grammar(rules: List[((NonTerminal, List[Symbol]), Context=>ASTNode)]) {
   def processProduction(production: ((NonTerminal, List[Symbol]), Context=>ASTNode)) = production match {
     case ((nt, to), fragment) => to -> fragment
   }
 
   val ntmp = (rules groupBy { case ((from, _), _) => from }) map { case (nt, productions) => nt -> productions.map(processProduction _) }
-
-
 }
 
 abstract class Symbol

@@ -9,5 +9,6 @@ This version of monac is being written in Scala (named monac-scala), with the in
 
 Relevant links:
 
+ - [Developer wiki](/wiki/)
  - [Contributing](/wiki/Contributing-to-monac)
  - [Gedit syntax highlighting for Mona](https://github.com/corazza/mona-gedit) (works accross other GNOME editors like Builder)
