@@ -4,7 +4,7 @@ import java.io.{File, PrintWriter}
 
 import org.monalang.monac.lexing._
 
-object LexerPreprocessing extends App {
+object LexerPrecompute extends App {
   // create expressions from FSAs
   val expressions = new StringBuilder("")
 

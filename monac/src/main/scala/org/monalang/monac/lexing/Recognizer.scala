@@ -80,10 +80,10 @@ object Recognizer {
                       "let"   -> KeywordLet) toMap
 
   // construction functions
-  def integerNumeral(lexeme: ValueLexeme): Token = IntegerNumeral(lexeme)
-  def floatNumeral(lexeme: ValueLexeme): Token = FloatNumeral(lexeme)
+  def integerNumeral(lexeme: ValueLexeme): Token = NumLiteral(lexeme)
+  def floatNumeral(lexeme: ValueLexeme): Token = NumLiteral(lexeme)
   def stringLiteral(lexeme: ValueLexeme): Token = StringLiteral(lexeme)
-  def characterLiteral(lexeme: ValueLexeme): Token = CharacterLiteral(lexeme)
+  def characterLiteral(lexeme: ValueLexeme): Token = CharLiteral(lexeme)
   def openParens(lexeme: ValueLexeme) = OpenParens(lexeme.toSyntactic)
   def closeParens(lexeme: ValueLexeme) = CloseParens(lexeme.toSyntactic)
   def openBlock(lexeme: ValueLexeme) = OpenBlock(lexeme.toSyntactic)

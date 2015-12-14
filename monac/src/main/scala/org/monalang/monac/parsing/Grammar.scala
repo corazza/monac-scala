@@ -1,18 +1,20 @@
 package org.monalang.monac.parsing
 
 import org.monalang.monac.lexing.Token
+import org.monalang.monac.symbol.SymbolTable
+
+import scala.reflect.ClassTag
 
 /**
   * Contains information about the context of a production.
   *
   *  - elements of production (for creating the AST / further processing)
-  *  - parent symbol table (for inserting definitions)
   */
-class Context {
+class Context(parentScope: SymbolTable, elements: List[ASTNode]) {
 
 }
 
-// TODO compute and cache ala FSA's
+// TODO precompute FSA's
 
 class Grammar(rules: List[((NonTerminal, List[Symbol]), Context=>ASTNode)]) {
   def processProduction(production: ((NonTerminal, List[Symbol]), Context=>ASTNode)) = production match {
@@ -23,11 +25,13 @@ class Grammar(rules: List[((NonTerminal, List[Symbol]), Context=>ASTNode)]) {
 }
 
 abstract class Symbol
-case class Terminal[A <: Token]() extends Symbol
-class NonTerminal extends Symbol
-case class Keyword(name: String) extends NonTerminal
+object EtaProduction extends Symbol
+case class Terminal[A <: Token](token: ClassTag[A]) extends Symbol
+
+abstract class NonTerminal extends Symbol
 
 // operators
 
 case class Optional(symbols: List[Symbol]) extends Symbol
 case class Repeat(symbol: Symbol) extends Symbol
+case class RepeatP(symbol: Symbol) extends Symbol

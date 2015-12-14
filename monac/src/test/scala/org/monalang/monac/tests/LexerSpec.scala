@@ -22,11 +22,11 @@ class LexerSpec extends FlatSpec {
       DoubleColon(SyntacticLexeme(2, 6)), DoubleColon(SyntacticLexeme(2, 8)), SemiColon(SyntacticLexeme(2, 9)),
       LowerId(ValueLexeme(3, 6, "/=")),
       LowerId(ValueLexeme(4, 6, "this")), LowerId(ValueLexeme(4, 11, "is")), LowerId(ValueLexeme(4, 14, "::")), UpperId(ValueLexeme(4, 17, "Test")),
-      FloatNumeral(ValueLexeme(4, 22, "-    9.99")), IntegerNumeral(ValueLexeme(4, 32, "000")), IntegerNumeral(ValueLexeme(4, 36, "-100")), IntegerNumeral(ValueLexeme(4, 41, "9")),
+      NumLiteral(ValueLexeme(4, 22, "-    9.99")), NumLiteral(ValueLexeme(4, 32, "000")), NumLiteral(ValueLexeme(4, 36, "-100")), NumLiteral(ValueLexeme(4, 41, "9")),
       OpenBlock(SyntacticLexeme(5, 6)), CloseBlock(SyntacticLexeme(5, 7)), OpenBlock(SyntacticLexeme(5, 8)),
       OpenBlock(SyntacticLexeme(6, 6)), CloseBlock(SyntacticLexeme(6, 8)), OpenBlock(SyntacticLexeme(6, 10)),
       OpenBlock(SyntacticLexeme(7, 6)), StringLiteral(ValueLexeme(7, 8, "\"another, test\"")), CloseBlock(SyntacticLexeme(7, 24)),
-      CharacterLiteral(ValueLexeme(7, 26, "'a'")), CharacterLiteral(ValueLexeme(7, 30, """'\n'""")), CharacterLiteral(ValueLexeme(7, 35, """'\A'""")))
+      CharLiteral(ValueLexeme(7, 26, "'a'")), CharLiteral(ValueLexeme(7, 30, """'\n'""")), CharLiteral(ValueLexeme(7, 35, """'\A'""")))
 
     val output = lexer.tokenStream.takeWhile(_ != EndOfSource).toList.filter(_ match {
       case t: Newlines => false

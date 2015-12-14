@@ -1,6 +1,7 @@
 package org.monalang.monac.parsing
 
 import org.monalang.monac.lexing._
+import scala.reflect._
 
 /*
 
@@ -17,37 +18,32 @@ object MonaGrammar extends Grammar(List(
 
   Declaration -> List(FLHS, RHS) -> Fragments.functionDeclaration,
 
-  FLHS -> List(Terminal[LowerId](), Terminal[LowerId](), Repeat(Terminal[LowerId]())) -> Fragments.FLHS,
+  FLHS -> List(Terminal(classTag[LowerId]), ArgumentListHead) -> Fragments.FLHS,
+  ArgumentListHead -> List(Terminal(classTag[LowerId]), ArgumentList) -> Fragments.argumentListHead,
+  ArgumentList -> List(ArgumentListHead) -> Fragments.argumentList,
+  ArgumentList -> List(EtaProduction)  -> Fragments.argumentList,
 
-  RHS -> List(Terminal[EqualsSign](), Expression) -> Fragments.RHS,
+  RHS -> List(Terminal(classTag[EqualsSign]), Expression) -> Fragments.RHS,
 
   Expression -> List(FunctionExpression) -> ((c)=>{ EmptyNode() /* extract FunctionExpression AST */ }),
-  Expression -> List(Terminal[KeywordIf](), Expression, Terminal[KeywordThen](), Expression, Terminal[KeywordElse](), Expression) -> Fragments.ifExpression,
+  Expression -> List(Terminal(classTag[KeywordIf]), Expression, Terminal(classTag[KeywordThen]), Expression, Terminal(classTag[KeywordElse]), Expression) -> Fragments.ifExpression,
 
   FunctionExpression -> List(Optional(List(FunctionExpression)), Argument) -> Fragments.functionExpression,
-  Argument -> List(Terminal[LowerId]()) -> Fragments.bindingExpression,
+  Argument -> List(Terminal(classTag[LowerId])) -> Fragments.bindingExpression,
   Argument -> List(Literal) -> Fragments.literalExpression,
-  Argument -> List(Terminal[OpenParens](), Expression, Terminal[CloseParens]()) -> ((c)=>{ EmptyNode() /* extract Expression AST */ }),
-  Argument -> List(Terminal[OpenBlock](), Repeat(Expression), Terminal[CloseBlock]()) -> ((c)=>{ EmptyNode() /* extract Expression AST */ })
-
-//  Expression -> List(Terminal[BeginLambda](), Terminal[LowerId](), Repeat(Terminal[LowerId]()), Terminal[FunctionArrow](), Expression) -> Fragments.lambda,
-//  Argument -> List(Terminal[OpenParens](), Expression, Terminal[CloseParens]()) -> ((c)=>EmptyNode()),
-//  Argument -> List(Literal) -> ((c)=>EmptyNode()),
-//
-//  Constraints -> List() -> Fragments.constraints,
-//
-//  // as-pattern
-//  Pattern -> List(Terminal[LowerId], Optional(List(Terminal[At](), Pattern))) -> Fragments.asPattern,
-//
-//  Pattern -> List(Literal) -> Fragments.literal,
-//  Pattern -> List(Terminal[Underscore]()) -> Fragments.underscore,
-//  Pattern -> List(Terminal[OpenParens](), Pattern, Terminal[CloseParens]()) -> ((c)=>EmptyNode()),
-//
-//  // binding
-//  Assignment -> List(Pattern, RHS) -> Fragments.functionDeclaration,
-//
-//  RHS -> List(GDRHS) -> Fragments.RHS,
-//
-//  GDRHS -> List(Guard, Terminal[EqualsSign](), Expression, Repeat(GDRHS)) -> Fragments.RHS,
-//  Guard -> List(Terminal[Vertical](), Expression),
+  Argument -> List(Terminal(classTag[OpenParens]), Expression, Terminal(classTag[CloseParens])) -> ((c)=>{ EmptyNode() /* extract Expression AST */ }),
+  Argument -> List(Terminal(classTag[OpenBlock]), Repeat(Expression), Terminal(classTag[CloseBlock])) -> ((c)=>{ EmptyNode() /* extract Expression AST */ })
 ))
+
+object Start extends NonTerminal
+object Declaration extends NonTerminal
+object FLHS extends NonTerminal
+object ArgumentListHead extends NonTerminal
+object ArgumentList extends NonTerminal
+object RHS extends NonTerminal
+object Expression extends NonTerminal
+object Block extends NonTerminal
+object FunctionExpression extends NonTerminal
+object Argument extends NonTerminal
+// TODO fix literals in the lexer
+object Literal extends NonTerminal

@@ -11,11 +11,7 @@ object Message {
    * Exceptions handled by the accessor of data.
    */
   def error(message: String) {
-    println("error: " + message)
-  }
-
-  def errors(messages: List[String]) {
-    messages foreach error
+    println(message)
   }
 
   def assert(condition: Boolean, message: String) {
