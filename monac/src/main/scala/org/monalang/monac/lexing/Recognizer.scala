@@ -64,7 +64,7 @@ object Recognizer {
     FSA("@") -> at _,
     FSA("_") -> underscore _,
     FSA("&") -> ampersand _,
-    FSA("|") -> vertical _,
+    FSA("V") -> vertical _,
     FSA("\\") -> backslash _,
     FSA("EE*") -> newlines _,
 

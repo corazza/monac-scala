@@ -1,8 +1,6 @@
-package org.monalang.monac
+package org.monalang.monac.lexing
 
 import java.io.{File, PrintWriter}
-
-import org.monalang.monac.lexing._
 
 object LexerPrecompute extends App {
   // create expressions from FSAs
@@ -19,10 +17,8 @@ object LexerPrecompute extends App {
     expressions ++= dimensions + ' ' + expression + '\n' + matrix + '\n'
   })
 
-  // write to file
   val writer = new PrintWriter(new File(this.getClass().getResource("/expressions").getPath()))
   writer.write(expressions.toString)
   writer.flush()
   writer.close()
-  assert(true)
 }
