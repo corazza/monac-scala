@@ -14,14 +14,19 @@ class RecursiveDescent(grammar: Grammar, tokens: Stream[Token]) {
   // state which remembers the next token to be read
   var i = 0
 
+  // HERE create a global file AST, fragments just return ASTs
+  // create basic symbol table system which accounts for modules
+  // expand grammar
+
   def parse(start: NonTerminal, parentScope: SymbolTable): ASTNode = {
-    val (production, fragment) = grammar.ntmp(start).head
+    val terminal = Terminal(ClassTag(tokens(i).getClass))
+    val ((_, production), fragment) = grammar.rules(grammar.parseTable(start)(terminal))
 
     val scope = new SymbolTable(Some(parentScope))
     val elements = new ArrayBuffer[ASTNode]()
 
     for(e <- production) e match {
-      case EtaProduction  => EmptyNode()
+      case Eta  => EmptyNode()
       case e: NonTerminal => elements += parse(e, scope)
       case Terminal(tag)  => matchToken(tag)
     }

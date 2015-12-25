@@ -47,4 +47,8 @@ object Fragments {
   def literalExpression(c: Context) = {
     EmptyNode()
   }
+
+  def emptyNode(c: Context) = {
+    EmptyNode()
+  }
 }
