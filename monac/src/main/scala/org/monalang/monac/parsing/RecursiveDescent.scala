@@ -13,6 +13,10 @@ import scala.reflect._
 class RecursiveDescent(grammar: Grammar, tokens: Stream[Token]) {
   // state which remembers the next token to be read
   var i = 0
+  
+  // HERE create a global file AST, fragments just return ASTs
+  // create basic symbol table system which accounts for modules
+  // expand grammar
 
   // HERE create a global file AST, fragments just return ASTs
   // create basic symbol table system which accounts for modules
