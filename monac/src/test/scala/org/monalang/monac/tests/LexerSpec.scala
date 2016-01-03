@@ -16,7 +16,7 @@ class LexerSpec extends FlatSpec {
       { "another, test" } 'a' '\n' '\A'
       """
 
-    val lexer = new Lexer(new BufferedReader(new InputStreamReader(new ByteArrayInputStream(inputString.getBytes()), "ISO-8859-1")))
+    val lexer = new Lexer(StringReader(inputString))
 
     val correctTokens = List[Token](
       DoubleColon(SyntacticLexeme(2, 6)), DoubleColon(SyntacticLexeme(2, 8)), SemiColon(SyntacticLexeme(2, 9)),

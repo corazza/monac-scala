@@ -1,6 +1,11 @@
 package org.monalang.monac.parsing
 
 object Fragments {
+  // special
+  def emptyNode(c: Context) = EmptyNode()
+  def extract(n: Int)(c: Context) = c.elements(n-1)
+
+  // production-specific
   def start(c: Context) = {
     EmptyNode()
   }
@@ -44,11 +49,16 @@ object Fragments {
     EmptyNode()
   }
 
-  def literalExpression(c: Context) = {
+  def declarationOrFE(c: Context) = {
+    // return combine PRIME and repeat
     EmptyNode()
   }
 
-  def emptyNode(c: Context) = {
+  def repeatId(c: Context) = {
+    EmptyNode()
+  }
+
+  def literalExpression(c: Context) = {
     EmptyNode()
   }
 }

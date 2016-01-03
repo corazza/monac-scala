@@ -1,9 +1,9 @@
 package org.monalang.monac.lexing
 
-import java.io.BufferedReader
-
-class Lexer(inputStream: BufferedReader) {
+case class Lexer(reader: Reader) {
   import Recognizer._
+
+  val inputStream = reader.inputStream
 
   private var current = inputStream.read().asInstanceOf[Char]
   private var next = inputStream.read().asInstanceOf[Char]

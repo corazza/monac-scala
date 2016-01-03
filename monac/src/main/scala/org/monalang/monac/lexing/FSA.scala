@@ -3,7 +3,7 @@ package org.monalang.monac.lexing
 import FSAPhase.Accepting
 import FSAPhase.Broken
 import FSAPhase.Continuing
-import org.monalang.monac.common.util.Reader
+import org.monalang.monac.common.util.SmartReader
 import scala.util.Try
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.Set
@@ -53,8 +53,8 @@ object FSA {
 
   while (reading) {
     def getDimensions(): Option[Int] =
-      Try(Reader.readUntil(inputStream, ' ').toInt).toOption
-    def getExpression(): String = Reader.readUntil(inputStream, '\n')
+      Try(SmartReader.readUntil(inputStream, ' ').toInt).toOption
+    def getExpression(): String = SmartReader.readUntil(inputStream, '\n')
 
     def getMatrix(dimensions: Int): ArrayBuffer[ArrayBuffer[Char]] = {
       val matrix = new ArrayBuffer[ArrayBuffer[Char]]()
@@ -70,7 +70,7 @@ object FSA {
     }
 
     def getFinalStates(): Set[Int] = {
-      val statesString = Reader.readUntil(inputStream, '\n')
+      val statesString = SmartReader.readUntil(inputStream, '\n')
       val statesList = statesString.split(' ').toList.map(_.toInt)
       Set() ++ statesList.toSet // because toSet returns immutable
     }

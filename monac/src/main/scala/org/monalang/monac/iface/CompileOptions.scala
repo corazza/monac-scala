@@ -37,6 +37,9 @@ case class CompileOptions(
 
     optionMap.get(name)
   }
+
+
+  if (sources.isEmpty && objects.isEmpty) throw new Exception("No input files")
 }
 
 object CompileOptions {

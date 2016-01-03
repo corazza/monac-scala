@@ -4,16 +4,14 @@ import org.monalang.monac.lexing.Token
 import org.monalang.monac.symbol.SymbolTable
 
 import scala.reflect.ClassTag
-import scala.collection.mutable.{HashMap, Set}
+import scala.collection.mutable.{ArrayBuffer, HashMap, Set}
 
 /**
   * Contains information about the context of a production.
   *
   *  - elements of production (for creating the AST / further processing)
   */
-class Context(parentScope: SymbolTable, elements: List[ASTNode]) {
-
-}
+case class Context(parentScope: SymbolTable, elements: List[ASTNode])
 
 class Grammar(val name: String, val rules: List[((NonTerminal, List[Symbol]), Context=>ASTNode)]) {
   import Grammar._
@@ -126,7 +124,7 @@ class Grammar(val name: String, val rules: List[((NonTerminal, List[Symbol]), Co
                 added = true
               }
 
-              if (followse.contains(Eta) || followse.isEmpty) {
+              if (!followsnt.subsetOf(followse) && (firstAfteri.contains(Eta) || followse.isEmpty)) {
                 followse ++= followsnt
                 added = true
               }
@@ -157,6 +155,7 @@ class Grammar(val name: String, val rules: List[((NonTerminal, List[Symbol]), Co
     parseTable
   }
 
+//  val parseTable = constructParseTable
   val parseTable = GrammarPrecompute.loadParseTable(name)
 }
 
@@ -166,7 +165,7 @@ object Grammar {
       parseTable(nonterminal) = HashMap()
     }
 
-    if (parseTable(nonterminal).contains(terminal)) {
+    if (parseTable(nonterminal).contains(terminal) && parseTable(nonterminal)(terminal) != rule) {
       println(nonterminal)
       println(terminal)
       println(parseTable(nonterminal)(terminal))
@@ -186,3 +185,7 @@ object End extends LogicalTerminal
 case class Terminal[A <: Token](token: ClassTag[A]) extends LogicalTerminal
 
 abstract class NonTerminal extends Symbol
+
+// operations
+
+case class RepeatP(s: Symbol) extends Symbol

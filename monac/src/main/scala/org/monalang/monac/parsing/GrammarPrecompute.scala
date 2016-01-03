@@ -2,7 +2,7 @@ package org.monalang.monac.parsing
 
 import java.io.{File, PrintWriter}
 
-import org.monalang.monac.common.util.Reader
+import org.monalang.monac.common.util.SmartReader
 
 import scala.collection.mutable.HashMap
 import scala.reflect.ClassTag
@@ -44,6 +44,8 @@ object GrammarPrecompute extends App {
     // temporary, should use reflection, not clear how objects can be obtained from their names
     def getNonTerminal(name: String): NonTerminal = name match {
       case "Start" => Start
+      case "StartPrime" => StartPrime
+      case "OptionalNewlines" => OptionalNewlines
       case "DeclarationSeparator" => DeclarationSeparator
       case "Declaration" => Declaration
       case "FLHS" => FLHS
@@ -51,14 +53,22 @@ object GrammarPrecompute extends App {
       case "ArgumentList" => ArgumentList
       case "RHS" => RHS
       case "Expression" => Expression
-      case "ExpressionSequence" => ExpressionSequence
-      case "ExpressionSequencePrime" => ExpressionSequencePrime
-      case "ExpressionSeparator" => ExpressionSeparator
+      case "ExpressionOther" => ExpressionOther
+      case "Statement" => Statement
+      case "StatementOther" => StatementOther
+      case "StatementSequence" => StatementSequence
+      case "StatementSequencePrime" => StatementSequencePrime
+      case "StatementSeparator" => StatementSeparator
+      case "DeclarationOrFE" => DeclarationOrFE
+      case "DeclarationOrFERepeatId" => DeclarationOrFERepeatId
+      case "DeclarationOrFEPrime" => DeclarationOrFEPrime
       case "Block" => Block
       case "FunctionExpression" => FunctionExpression
       case "FunctionExpressionPrime" => FunctionExpressionPrime
       case "Argument" => Argument
+      case "ArgumentOther" => ArgumentOther
       case "Literal" => Literal
+      case _ => Start // error
     }
 
     val parseTable = HashMap[NonTerminal, HashMap[LogicalTerminal, Int]]()
@@ -69,18 +79,20 @@ object GrammarPrecompute extends App {
       var reading = true
 
       while (reading) {
-        val line = Reader.readUntil(inputStream, '\n')
+        val line = SmartReader.readUntil(inputStream, '\n')
 
         if (line != "") {
           val split = line.split(" ")
           val terminal = split(0)
           val rule = split(1).toInt
-          Grammar.addEntry(parseTable, getNonTerminal(name), Terminal(ClassTag(Class.forName("org.monalang.monac.lexing." + terminal))), rule)
-        } else reading = false
+          if (terminal != "End") Grammar.addEntry(parseTable, getNonTerminal(name), Terminal(ClassTag(Class.forName("org.monalang.monac.lexing." + terminal))), rule)
+          else Grammar.addEntry(parseTable, getNonTerminal(name), End, rule)
+        }
+        else reading = false
       }
     }
 
-    while (reading) Try(Reader.readUntil(inputStream, '\n')).toOption match {
+    while (reading) Try(SmartReader.readUntil(inputStream, '\n')).toOption match {
         case Some(name) => if (name == "") reading = false
                            else addBlock(name)
         case None => reading = false

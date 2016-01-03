@@ -4,12 +4,12 @@ import java.io.InputStream
 
 // TODO docs
 
-object Reader {
+object SmartReader {
   def readWhole(inputStream: InputStream) = readUntil(inputStream, (-1).asInstanceOf[Char])
 
   def readUntil(inputStream: InputStream, stop: Char) = {
     val result = new StringBuilder("")
-    Reader.read(inputStream, { c =>
+    SmartReader.read(inputStream, { c =>
       if (c == stop) {
         false
       } else {

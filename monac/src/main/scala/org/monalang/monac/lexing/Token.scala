@@ -56,7 +56,6 @@ case object EndOfSource extends VirtualToken
 
 // keyword
 abstract class Keyword(lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
-
 case class KeywordIf(override val lexeme: SyntacticLexeme) extends Keyword(lexeme)
 case class KeywordThen(override val lexeme: SyntacticLexeme) extends Keyword(lexeme)
 case class KeywordElse(override val lexeme: SyntacticLexeme) extends Keyword(lexeme)
