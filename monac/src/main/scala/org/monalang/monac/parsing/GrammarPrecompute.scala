@@ -64,6 +64,7 @@ object GrammarPrecompute extends App {
       case "DeclarationOrExpression" => DeclarationOrExpression
       case "DeclarationOrExpressionRepeatId" => DeclarationOrExpressionRepeatId
       case "DeclarationOrExpressionPrime" => DeclarationOrExpressionPrime
+      case "DeclarationOrExpressionPrimePrime" => DeclarationOrExpressionPrimePrime
       case "Block" => Block
       case "FunctionExpression" => FunctionExpression
       case "FunctionExpressionPrime" => FunctionExpressionPrime

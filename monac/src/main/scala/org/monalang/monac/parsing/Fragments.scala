@@ -4,7 +4,7 @@ object Fragments {
   // special
   def emptyNode(c: Context) = EmptyNode()
   def extract(n: Int)(c: Context) = c.elements(n-1)
-  val matched = extract(1)_
+  val matched = extract(1) _
 
   // production-specific
   def start(c: Context) = {

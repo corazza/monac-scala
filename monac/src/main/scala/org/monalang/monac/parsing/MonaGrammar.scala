@@ -55,7 +55,9 @@ object MonaGrammar extends Grammar("mona", List(
   DeclarationOrExpressionRepeatId -> List(Eta) -> Fragments.emptyNode,
   DeclarationOrExpressionRepeatId -> List(Terminal(classTag[LowerId]), DeclarationOrExpressionRepeatId) -> Fragments.repeatId,
   DeclarationOrExpressionPrime -> List(Eta) -> Fragments.emptyNode,
-  DeclarationOrExpressionPrime -> List(SimpleArgument, FunctionExpressionPrime) -> Fragments.emptyNode, // wrap in a special node
+  DeclarationOrExpressionPrime -> List(SimpleArgument, DeclarationOrExpressionPrimePrime) -> Fragments.emptyNode, // wrap in a special node
+  DeclarationOrExpressionPrimePrime -> List(FunctionExpressionPrime) -> Fragments.emptyNode,
+  DeclarationOrExpressionPrimePrime -> List(Operator, Expression) -> Fragments.emptyNode,
   DeclarationOrExpressionPrime -> List(RHS) -> Fragments.RHS,
 
   StatementSeparator  -> List(Terminal(classTag[Newlines])) -> Fragments.emptyNode,
@@ -87,6 +89,7 @@ object StatementSeparator extends NonTerminal
 object DeclarationOrExpression extends NonTerminal
 object DeclarationOrExpressionRepeatId extends NonTerminal
 object DeclarationOrExpressionPrime extends NonTerminal
+object DeclarationOrExpressionPrimePrime extends NonTerminal
 object Block extends NonTerminal
 object FunctionExpression extends NonTerminal
 object FunctionExpressionPrime extends NonTerminal

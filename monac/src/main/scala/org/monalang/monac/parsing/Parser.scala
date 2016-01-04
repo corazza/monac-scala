@@ -30,7 +30,11 @@ case class Parser(lexer: Lexer) {
 
     val ((_, production), fragment) = Try(MonaGrammar.rules(MonaGrammar.parseTable(start)(terminal))).toOption match {
       case Some(a) => a
-      case None => throw new Exception("Syntax error (production)")
+      case None => {
+        println(start)
+        println(terminal)
+        throw new Exception("Syntax error (production)")
+      }
     }
 
     val scope = new SymbolTable(Some(parentScope))
