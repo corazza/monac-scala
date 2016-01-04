@@ -4,6 +4,7 @@ object Fragments {
   // special
   def emptyNode(c: Context) = EmptyNode()
   def extract(n: Int)(c: Context) = c.elements(n-1)
+  val matched = extract(1)_
 
   // production-specific
   def start(c: Context) = {
@@ -33,6 +34,10 @@ object Fragments {
     EmptyNode()
   }
 
+  def infix(c: Context) = {
+    EmptyNode()
+  }
+
   def functionExpression(c: Context) = {
     EmptyNode()
   }
@@ -55,10 +60,6 @@ object Fragments {
   }
 
   def repeatId(c: Context) = {
-    EmptyNode()
-  }
-
-  def literalExpression(c: Context) = {
     EmptyNode()
   }
 }

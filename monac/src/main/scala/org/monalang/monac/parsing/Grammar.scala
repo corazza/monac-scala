@@ -1,9 +1,9 @@
 package org.monalang.monac.parsing
 
-import org.monalang.monac.lexing.Token
+import org.monalang.monac.lexing.{OperatorId, Token}
 import org.monalang.monac.symbol.SymbolTable
 
-import scala.reflect.ClassTag
+import scala.reflect._
 import scala.collection.mutable.{ArrayBuffer, HashMap, Set}
 
 /**
@@ -40,7 +40,7 @@ class Grammar(val name: String, val rules: List[((NonTerminal, List[Symbol]), Co
         else i += 1
       }
 
-      if (pass && i == in.length) result += Eta
+      if (pass && i == in.length && in.length != 0) result += Eta
 
       result
     }

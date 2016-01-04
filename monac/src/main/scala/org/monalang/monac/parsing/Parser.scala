@@ -7,7 +7,9 @@ import scala.collection.mutable.ArrayBuffer
 import scala.reflect.ClassTag
 import scala.util.Try
 
-// HERE create a global file AST, fragments just return ASTs
+// HERE test parsing of simplified grammar
+
+// create a global file AST, fragments just return ASTs
 // create basic symbol table system which accounts for modules
 // expand grammar
 
@@ -37,7 +39,7 @@ case class Parser(lexer: Lexer) {
     for(e <- production) e match {
       case Eta => EmptyNode()
       case e: NonTerminal => elements += parse(e, scope)
-      case Terminal(tag)  => matchToken(tag)
+      case Terminal(tag)  => elements += matchToken(tag)
     }
 
     fragment(Context(parentScope, elements.toList))
@@ -45,6 +47,7 @@ case class Parser(lexer: Lexer) {
 
   def matchToken[A <: Token](tokenTag: ClassTag[A]): ASTNode = {
     val read = tokens(i)
+    println("matching: " + read + " with " + tokenTag)
     i += 1
 
     if (tokenTag.runtimeClass == read.getClass) {
@@ -54,6 +57,7 @@ case class Parser(lexer: Lexer) {
         case StringLiteral(lexeme) => StringNode(lexeme)
         case LowerId(lexeme) => LowerIdNode(lexeme)
         case UpperId(lexeme) => UpperIdNode(lexeme)
+        case OperatorId(lexeme) => OperatorNode(lexeme)
         case _ => EmptyNode()
       }
     } else {

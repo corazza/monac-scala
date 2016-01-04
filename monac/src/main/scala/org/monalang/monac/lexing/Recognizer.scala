@@ -4,13 +4,13 @@ package org.monalang.monac.lexing
  * FSA recognizers used by the lexer, character classes enumeration.
  */
 object Recognizer {
-  val specialCharacters: Map[Char, Char] = Map(
+  val specialCharacters = Map(
     'P' -> '.',
     'E' -> '\n',
     'O' -> '(',
     'C' -> ')',
     'V' -> '|',
-    '*' -> '*',
+    'K' -> '*',
     'S' -> ' ',
     'T' -> '\t'
   )
@@ -65,6 +65,7 @@ object Recognizer {
     FSA("_") -> underscore _,
     FSA("&") -> ampersand _,
     FSA("V") -> vertical _,
+    FSA("`") -> backtick _,
     FSA("\\") -> backslash _,
     FSA("EE*") -> newlines _,
 
@@ -72,12 +73,12 @@ object Recognizer {
     FSA("L(L|D)*'*") -> regularIdentifierOrKeyword _,
     FSA("(I|U)(I|U)*") -> special _)
 
-  val keywords = List("if"    -> KeywordData,
+  val keywords = Map("if"    -> KeywordData,
                       "then"  -> KeywordThen,
                       "else"  -> KeywordElse,
                       "data"  -> KeywordData,
                       "class" -> KeywordClass,
-                      "let"   -> KeywordLet) toMap
+                      "let"   -> KeywordLet)
 
   // construction functions
   def integerNumeral(lexeme: ValueLexeme): Token = NumLiteral(lexeme)
@@ -98,6 +99,7 @@ object Recognizer {
   def underscore(lexeme: ValueLexeme) = Underscore(lexeme.toSyntactic)
   def ampersand(lexeme: ValueLexeme) = Ampersand(lexeme.toSyntactic)
   def vertical(lexeme: ValueLexeme) = Vertical(lexeme.toSyntactic)
+  def backtick(lexeme: ValueLexeme) = Backtick(lexeme.toSyntactic)
   def newlines(lexeme: ValueLexeme) = Newlines(lexeme.toSyntactic)
   def backslash(lexeme: ValueLexeme) = BeginLambda(lexeme.toSyntactic)
 
@@ -118,7 +120,7 @@ object Recognizer {
     case _ => specialIdentifier(lexeme)
   }
 
-  def specialIdentifier(lexeme: ValueLexeme): Token = LowerId(lexeme)
+  def specialIdentifier(lexeme: ValueLexeme): Token = OperatorId(lexeme)
 
   // helpers for constructing regexes
   def without(string: String, cs: Char*) = string.filter(c => cs.forall(_ != c))

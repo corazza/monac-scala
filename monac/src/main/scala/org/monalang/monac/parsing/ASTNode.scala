@@ -14,3 +14,4 @@ case class StringNode(lexeme: ValueLexeme) extends LiteralNode(lexeme)
 abstract class Identifier(lexeme: ValueLexeme) extends ASTNode
 case class LowerIdNode(lexeme: ValueLexeme) extends Identifier(lexeme)
 case class UpperIdNode(lexeme: ValueLexeme) extends Identifier(lexeme)
+case class OperatorNode(lexeme: ValueLexeme) extends Identifier(lexeme)

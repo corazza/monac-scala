@@ -53,20 +53,22 @@ object GrammarPrecompute extends App {
       case "ArgumentList" => ArgumentList
       case "RHS" => RHS
       case "Expression" => Expression
-      case "ExpressionOther" => ExpressionOther
+      case "ExpressionPrime" => ExpressionPrime
+      case "SimpleExpression" => SimpleExpression
+      case "Operator" => Operator
       case "Statement" => Statement
       case "StatementOther" => StatementOther
       case "StatementSequence" => StatementSequence
       case "StatementSequencePrime" => StatementSequencePrime
       case "StatementSeparator" => StatementSeparator
-      case "DeclarationOrFE" => DeclarationOrFE
-      case "DeclarationOrFERepeatId" => DeclarationOrFERepeatId
-      case "DeclarationOrFEPrime" => DeclarationOrFEPrime
+      case "DeclarationOrExpression" => DeclarationOrExpression
+      case "DeclarationOrExpressionRepeatId" => DeclarationOrExpressionRepeatId
+      case "DeclarationOrExpressionPrime" => DeclarationOrExpressionPrime
       case "Block" => Block
       case "FunctionExpression" => FunctionExpression
       case "FunctionExpressionPrime" => FunctionExpressionPrime
       case "Argument" => Argument
-      case "ArgumentOther" => ArgumentOther
+      case "SimpleArgument" => SimpleArgument
       case "Literal" => Literal
       case _ => Start // error
     }

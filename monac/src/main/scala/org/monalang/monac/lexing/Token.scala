@@ -43,12 +43,12 @@ case class EqualsSign(override val lexeme: SyntacticLexeme) extends SyntacticTok
 case class Underscore(override val lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 case class Ampersand(override val lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 case class Vertical(override val lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
+case class Backtick(override val lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 case class Newlines(override val lexeme: SyntacticLexeme) extends SyntacticToken(lexeme)
 
 // identifiers
-// starts with lower or is special
+case class OperatorId(override val lexeme: ValueLexeme) extends ValueToken(lexeme)
 case class LowerId(override val lexeme: ValueLexeme) extends ValueToken(lexeme)
-// starts with upper or _ or $
 case class UpperId(override val lexeme: ValueLexeme) extends ValueToken(lexeme)
 
 // virtual tokens (inserted)

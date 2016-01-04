@@ -22,44 +22,48 @@ object MonaGrammar extends Grammar("mona", List(
 
   RHS -> List(Terminal(classTag[EqualsSign]), OptionalNewlines, Expression) -> Fragments.RHS,
 
-  Expression -> List(FunctionExpression) -> Fragments.extract(1),
-  Expression -> List(ExpressionOther) -> Fragments.extract(1),
-  ExpressionOther -> List(Terminal(classTag[KeywordIf]), Expression, Terminal(classTag[KeywordThen]), Expression, Terminal(classTag[KeywordElse]), Expression) -> Fragments.ifExpression,
+  Expression -> List(FunctionExpression, ExpressionPrime) -> Fragments.emptyNode,
+  Expression -> List(SimpleExpression, ExpressionPrime) -> Fragments.emptyNode,
+  ExpressionPrime -> List(Eta) -> Fragments.emptyNode,
+  ExpressionPrime -> List(Operator, Expression) -> Fragments.infix,
+
+  Operator -> List(Terminal(classTag[OperatorId])) -> Fragments.matched,
+  Operator -> List(Terminal(classTag[Backtick]), Terminal(classTag[LowerId]), Terminal(classTag[Backtick])) -> Fragments.extract(2),
+
+  SimpleExpression -> List(Terminal(classTag[KeywordIf]), Expression, Terminal(classTag[KeywordThen]), Expression, Terminal(classTag[KeywordElse]), Expression) -> Fragments.ifExpression,
 
   FunctionExpression -> List(Argument, FunctionExpressionPrime) -> Fragments.functionExpression,
   FunctionExpressionPrime -> List(FunctionExpression) -> Fragments.functionExpression,
   FunctionExpressionPrime -> List(Eta) -> Fragments.emptyNode,
 
   Argument -> List(Terminal(classTag[LowerId])) -> Fragments.bindingExpression,
-  Argument -> List(ArgumentOther) -> Fragments.extract(1),
-  ArgumentOther -> List(Literal) -> Fragments.literalExpression,
-  ArgumentOther -> List(Terminal(classTag[OpenParens]), OptionalNewlines, Expression, OptionalNewlines, Terminal(classTag[CloseParens])) -> ((c)=>{ EmptyNode() /* extract Expression AST */ }),
-  ArgumentOther -> List(Terminal(classTag[OpenBlock]), OptionalNewlines, StatementSequence, Terminal(classTag[CloseBlock])) -> ((c)=>{ EmptyNode() /* extract Expression AST */ }),
+  Argument -> List(SimpleArgument) -> Fragments.extract(1),
+  SimpleArgument -> List(Literal) -> Fragments.extract(1),
+  SimpleArgument -> List(Terminal(classTag[OpenParens]), OptionalNewlines, Expression, OptionalNewlines, Terminal(classTag[CloseParens])) -> ((c)=>{ EmptyNode() /* extract Expression AST */ }),
+  SimpleArgument -> List(Terminal(classTag[OpenBlock]), OptionalNewlines, StatementSequence, Terminal(classTag[CloseBlock])) -> ((c)=>{ EmptyNode() /* extract Expression AST */ }),
 
-  // Evaluates to ()
   StatementSequence -> List(Statement, StatementSequencePrime) -> Fragments.emptyNode,
   StatementSequencePrime -> List(Eta) -> Fragments.emptyNode,
   StatementSequencePrime -> List(StatementSeparator, StatementSequence) -> Fragments.emptyNode,
 
   Statement -> List(Eta) -> Fragments.emptyNode,
-  Statement -> List(DeclarationOrFE) -> Fragments.extract(1),
-  Statement -> List(ExpressionOther) -> Fragments.extract(1),
+  Statement -> List(DeclarationOrExpression) -> Fragments.extract(1),
+  Statement -> List(SimpleExpression) -> Fragments.extract(1),
 
-  DeclarationOrFE -> List(ArgumentOther) -> Fragments.extract(1),
-
-  DeclarationOrFE -> List(Terminal(classTag[LowerId]), DeclarationOrFERepeatId, DeclarationOrFEPrime) -> Fragments.emptyNode,
-  DeclarationOrFERepeatId -> List(Eta) -> Fragments.emptyNode,
-  DeclarationOrFERepeatId -> List(Terminal(classTag[LowerId]), DeclarationOrFERepeatId) -> Fragments.repeatId,
-  DeclarationOrFEPrime -> List(Eta) -> Fragments.emptyNode,
-  DeclarationOrFEPrime -> List(ArgumentOther, FunctionExpressionPrime) -> Fragments.emptyNode, // wrap in a special node
-  DeclarationOrFEPrime -> List(RHS) -> Fragments.RHS,
+  DeclarationOrExpression -> List(SimpleArgument) -> Fragments.extract(1),
+  DeclarationOrExpression -> List(Terminal(classTag[LowerId]), DeclarationOrExpressionRepeatId, DeclarationOrExpressionPrime) -> Fragments.emptyNode,
+  DeclarationOrExpressionRepeatId -> List(Eta) -> Fragments.emptyNode,
+  DeclarationOrExpressionRepeatId -> List(Terminal(classTag[LowerId]), DeclarationOrExpressionRepeatId) -> Fragments.repeatId,
+  DeclarationOrExpressionPrime -> List(Eta) -> Fragments.emptyNode,
+  DeclarationOrExpressionPrime -> List(SimpleArgument, FunctionExpressionPrime) -> Fragments.emptyNode, // wrap in a special node
+  DeclarationOrExpressionPrime -> List(RHS) -> Fragments.RHS,
 
   StatementSeparator  -> List(Terminal(classTag[Newlines])) -> Fragments.emptyNode,
   StatementSeparator  -> List(Terminal(classTag[SemiColon])) -> Fragments.emptyNode,
 
-  Literal -> List(Terminal(classTag[NumLiteral])) -> Fragments.literalExpression,
-  Literal -> List(Terminal(classTag[CharLiteral])) -> Fragments.literalExpression,
-  Literal -> List(Terminal(classTag[StringLiteral])) -> Fragments.literalExpression
+  Literal -> List(Terminal(classTag[NumLiteral])) -> Fragments.matched,
+  Literal -> List(Terminal(classTag[CharLiteral])) -> Fragments.matched,
+  Literal -> List(Terminal(classTag[StringLiteral])) -> Fragments.matched
 ))
 
 object Start extends NonTerminal
@@ -72,18 +76,20 @@ object ArgumentListHead extends NonTerminal
 object ArgumentList extends NonTerminal
 object RHS extends NonTerminal
 object Expression extends NonTerminal
-object ExpressionOther extends NonTerminal
+object ExpressionPrime extends NonTerminal
+object SimpleExpression extends NonTerminal
+object Operator extends NonTerminal
 object Statement extends NonTerminal
 object StatementOther extends NonTerminal
 object StatementSequence extends NonTerminal
 object StatementSequencePrime extends NonTerminal
 object StatementSeparator extends NonTerminal
-object DeclarationOrFE extends NonTerminal
-object DeclarationOrFERepeatId extends NonTerminal
-object DeclarationOrFEPrime extends NonTerminal
+object DeclarationOrExpression extends NonTerminal
+object DeclarationOrExpressionRepeatId extends NonTerminal
+object DeclarationOrExpressionPrime extends NonTerminal
 object Block extends NonTerminal
 object FunctionExpression extends NonTerminal
 object FunctionExpressionPrime extends NonTerminal
 object Argument extends NonTerminal
-object ArgumentOther extends NonTerminal
+object SimpleArgument extends NonTerminal
 object Literal extends NonTerminal
