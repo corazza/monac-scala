@@ -11,4 +11,4 @@ Relevant links:
 
  - [Compiler developer wiki](https://github.com/corazza/monac-scala/wiki)
  - [Contributing](https://github.com/corazza/monac-scala/wiki/Contributing-to-monac)
- - [Gedit syntax highlighting for Mona](https://github.com/corazza/mona-gedit) (works accross other GNOME editors like Builder)
+ - [Gedit syntax highlighting for Mona](https://gist.github.com/corazza/3e7712786f7e4057b798) (works accross other GNOME editors like Builder)
