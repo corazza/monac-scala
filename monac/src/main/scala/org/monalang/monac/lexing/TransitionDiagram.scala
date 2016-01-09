@@ -58,6 +58,7 @@ class TransitionDiagram(val matrix: ArrayBuffer[ArrayBuffer[Char]], val finalSta
         c == transition ||
         c == TransitionDiagram.LetterTransition && Recognizer.LiteralCharacters.letter.contains(transition) ||
         c == TransitionDiagram.DigitTransition && Recognizer.LiteralCharacters.digit.contains(transition) ||
+        c == TransitionDiagram.WhitespaceTransition && Recognizer.LiteralCharacters.whitespace.contains(transition) ||
         c == TransitionDiagram.IdTransition && Recognizer.LiteralCharacters.id.contains(transition) ||
         c == TransitionDiagram.NonIdTransition && Recognizer.LiteralCharacters.nonid.contains(transition) ||
         c == TransitionDiagram.UnicodeTransition && CharUtil.isUnicode(transition)
@@ -104,6 +105,7 @@ class TransitionDiagram(val matrix: ArrayBuffer[ArrayBuffer[Char]], val finalSta
           case TransitionDiagram.EtaTransition => "E"
           case TransitionDiagram.AnyTransition => "A"
           case TransitionDiagram.LetterTransition => "L"
+          case TransitionDiagram.WhitespaceTransition => "W"
           case TransitionDiagram.DigitTransition => "D"
           case TransitionDiagram.IdTransition => "I"
           case TransitionDiagram.NonIdTransition => "N"
@@ -147,8 +149,9 @@ object TransitionDiagram {
   val IdTransition = 4: Char
   val NonIdTransition = 5: Char
   val UnicodeTransition = 6: Char
+  val WhitespaceTransition = 7: Char
 
-  val AnyTransition = 7: Char // except newline
+  val AnyTransition = 8: Char // except newline
 
   /**
    * Create empty transition diagram with initialStates states

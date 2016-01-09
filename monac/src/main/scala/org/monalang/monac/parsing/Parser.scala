@@ -22,8 +22,6 @@ case class Parser(lexer: Lexer) {
   var i = 0
 
   def parse(start: NonTerminal, parentScope: SymbolTable): ASTNode = {
-    println("parsing " + start)
-
     val nextToken = tokens(i)
 
     val terminal = if (nextToken != EndOfSource) Terminal(ClassTag(nextToken.getClass)) else End
@@ -32,7 +30,7 @@ case class Parser(lexer: Lexer) {
       case Some(a) => a
       case None => {
         println(start)
-        println(terminal)
+        println(nextToken)
         throw new Exception("Syntax error (production)")
       }
     }
@@ -51,7 +49,6 @@ case class Parser(lexer: Lexer) {
 
   def matchToken[A <: Token](tokenTag: ClassTag[A]): ASTNode = {
     val read = tokens(i)
-    println("matching: " + read + " with " + tokenTag)
     i += 1
 
     if (tokenTag.runtimeClass == read.getClass) {
@@ -59,9 +56,9 @@ case class Parser(lexer: Lexer) {
         case NumLiteral(lexeme) => Num(lexeme)
         case CharLiteral(lexeme) => Char(lexeme)
         case StringLiteral(lexeme) => StringNode(lexeme)
-        case LowerId(lexeme) => LowerIdNode(lexeme)
-        case UpperId(lexeme) => UpperIdNode(lexeme)
-        case OperatorId(lexeme) => OperatorNode(lexeme)
+        case LowerIdToken(lexeme) => LowerId(lexeme)
+        case UpperIdToken(lexeme) => UpperId(lexeme)
+        case OperatorId(lexeme) => Operator(lexeme)
         case _ => EmptyNode()
       }
     } else {
@@ -69,5 +66,8 @@ case class Parser(lexer: Lexer) {
     }
   }
 
-  parse(Start, sourceScope)
+  val parsed = parse(StartNT, sourceScope)
+
+  println(parsed)
+  println(sourceScope.lookupTable)
 }

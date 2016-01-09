@@ -12,6 +12,7 @@ case object Whichever extends Node
 
 // classes (nonenumerated)
 case object Letter extends Node
+case object Whitespace extends Node
 case object Digit extends Node
 case object Id extends Node
 case object NonId extends Node
@@ -65,6 +66,7 @@ object Regex {
           operands.push(Cat(nodel, noder))
         }
         case 'L' => operands.push(Letter)
+        case 'W' => operands.push(Whitespace)
         case 'D' => operands.push(Digit)
         case 'I' => operands.push(Id)
         case 'N' => operands.push(NonId)

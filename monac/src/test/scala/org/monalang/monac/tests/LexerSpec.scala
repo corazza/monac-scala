@@ -20,8 +20,8 @@ class LexerSpec extends FlatSpec {
 
     val correctTokens = List[Token](
       DoubleColon(SyntacticLexeme(2, 6)), DoubleColon(SyntacticLexeme(2, 8)), SemiColon(SyntacticLexeme(2, 9)),
-      LowerId(ValueLexeme(3, 6, "/=")),
-      LowerId(ValueLexeme(4, 6, "this")), LowerId(ValueLexeme(4, 11, "is")), LowerId(ValueLexeme(4, 14, "::")), UpperId(ValueLexeme(4, 17, "Test")),
+      LowerIdToken(ValueLexeme(3, 6, "/=")),
+      LowerIdToken(ValueLexeme(4, 6, "this")), LowerIdToken(ValueLexeme(4, 11, "is")), LowerIdToken(ValueLexeme(4, 14, "::")), UpperIdToken(ValueLexeme(4, 17, "Test")),
       NumLiteral(ValueLexeme(4, 22, "-    9.99")), NumLiteral(ValueLexeme(4, 32, "000")), NumLiteral(ValueLexeme(4, 36, "-100")), NumLiteral(ValueLexeme(4, 41, "9")),
       OpenBlock(SyntacticLexeme(5, 6)), CloseBlock(SyntacticLexeme(5, 7)), OpenBlock(SyntacticLexeme(5, 8)),
       OpenBlock(SyntacticLexeme(6, 6)), CloseBlock(SyntacticLexeme(6, 8)), OpenBlock(SyntacticLexeme(6, 10)),

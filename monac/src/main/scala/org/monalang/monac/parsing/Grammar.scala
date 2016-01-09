@@ -99,7 +99,7 @@ class Grammar(val name: String, val rules: List[((NonTerminal, List[Symbol]), Co
       }
     }
 
-    getFollow(Start) += End
+    getFollow(StartNT) += End
 
     added = true
     while (added) {

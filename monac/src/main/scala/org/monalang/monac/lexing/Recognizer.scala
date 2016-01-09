@@ -67,7 +67,7 @@ object Recognizer {
     FSA("V") -> vertical _,
     FSA("`") -> backtick _,
     FSA("\\") -> backslash _,
-    FSA("EE*") -> newlines _,
+    FSA("EW*") -> newlines _,
 
     // identifiers and lookalike purely syntactic elements
     FSA("L(L|D)*'*") -> regularIdentifierOrKeyword _,
@@ -105,8 +105,8 @@ object Recognizer {
 
   def regularIdentifierOrKeyword(lexeme: ValueLexeme): Token = {
     if (keywords.contains(lexeme.data)) keywords(lexeme.data)(lexeme.toSyntactic)
-    else if (lexeme.data(0).isLower)    LowerId(lexeme)
-    else                                UpperId(lexeme)
+    else if (lexeme.data(0).isLower)    LowerIdToken(lexeme)
+    else                                UpperIdToken(lexeme)
   }
 
   /**

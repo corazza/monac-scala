@@ -157,6 +157,12 @@ object TransitionDiagramEditor {
       result
     }
 
+    case Whitespace => {
+      val result = TransitionDiagram(2)
+      result.addTransition(0, 1, TransitionDiagram.WhitespaceTransition)
+      result
+    }
+
     case Digit => {
       val result = TransitionDiagram(2)
       result.addTransition(0, 1, TransitionDiagram.DigitTransition)

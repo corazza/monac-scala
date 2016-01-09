@@ -48,8 +48,8 @@ case class Newlines(override val lexeme: SyntacticLexeme) extends SyntacticToken
 
 // identifiers
 case class OperatorId(override val lexeme: ValueLexeme) extends ValueToken(lexeme)
-case class LowerId(override val lexeme: ValueLexeme) extends ValueToken(lexeme)
-case class UpperId(override val lexeme: ValueLexeme) extends ValueToken(lexeme)
+case class LowerIdToken(override val lexeme: ValueLexeme) extends ValueToken(lexeme)
+case class UpperIdToken(override val lexeme: ValueLexeme) extends ValueToken(lexeme)
 
 // virtual tokens (inserted)
 case object EndOfSource extends VirtualToken
