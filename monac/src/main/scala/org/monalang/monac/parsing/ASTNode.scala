@@ -21,7 +21,7 @@ case class FLHS(identifier: String, arguments: ArgumentList) extends ASTNode
 case class ArgumentList(arguments: List[String]) extends ASTNode
 
 abstract class Statement extends ASTNode
-case class Definition(name: String) extends Statement
+case class Definition(name: String, symbol: org.monalang.monac.symbol.Symbol) extends Statement
 
 
 abstract class ScopedNode(val scope: SymbolTable) extends ASTNode

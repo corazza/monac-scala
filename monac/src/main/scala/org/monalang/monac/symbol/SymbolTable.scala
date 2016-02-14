@@ -11,7 +11,5 @@ class SymbolTable() {
 
   def addSymbol(name: String, symbol: Symbol) {
     lookupTable += name -> symbol
-
-    println("adding " + name + ", " + symbol)
   }
 }

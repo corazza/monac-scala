@@ -12,13 +12,13 @@ object Fragments {
     val definition = c.elements(0).asInstanceOf[Definition]
     if (c.elements(1).isInstanceOf[EmptyNode]) {
       val scope = new SymbolTable()
-      scope.addSymbol(definition.name, PlaceholderSymbol())
+      scope.addSymbol(definition.name, definition.symbol)
       DefinitionSequence(scope, List(definition))
     }
     else {
       val sequence = c.elements(1).asInstanceOf[DefinitionSequence]
       val scope = sequence.scope
-      scope.addSymbol(definition.name, PlaceholderSymbol())
+      scope.addSymbol(definition.name, definition.symbol)
       DefinitionSequence(scope, definition +: sequence.definitions)
     }
   }
@@ -27,7 +27,7 @@ object Fragments {
     val flhs = c.elements(0).asInstanceOf[FLHS]
     val expression = c.elements(1).asInstanceOf[Expression]
     for (id <- flhs.arguments.arguments) expression.scope.addSymbol(id, ArgumentMarker())
-    Definition(flhs.identifier)
+    Definition(flhs.identifier, SymbolToAST(expression))
   }
 
   def FLHSNT(c: Context) = FLHS(c.elements(0).asInstanceOf[LowerId].lexeme.data, c.elements(1).asInstanceOf[ArgumentList])
