@@ -23,12 +23,13 @@ case class ArgumentList(arguments: List[String]) extends ASTNode
 abstract class Statement extends ASTNode
 case class Definition(name: String) extends Statement
 
-case class DefinitionSequence(definitions: List[Definition]) extends ASTNode
 
 abstract class ScopedNode(val scope: SymbolTable) extends ASTNode
+
+case class DefinitionSequence(override val scope: SymbolTable, definitions: List[Definition]) extends ScopedNode(scope)
 
 abstract class Expression(scope: SymbolTable) extends ScopedNode(scope)
 case class StatementSequence(override val scope: SymbolTable, statements: List[Statement]) extends Expression(scope)
 case class ExpressionStatement(override val scope: SymbolTable) extends Expression(scope)
 
-case class UnitExpression() extends Expression(new SymbolTable(None))
+case class UnitExpression() extends Expression(new SymbolTable())

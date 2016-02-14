@@ -11,7 +11,7 @@ import scala.collection.mutable.{ArrayBuffer, HashMap, Set}
   *
   *  - elements of production (for creating the AST / further processing)
   */
-case class Context(parentScope: SymbolTable, elements: List[ASTNode])
+case class Context(elements: List[ASTNode])
 
 class Grammar(val name: String, val rules: List[((NonTerminal, List[Symbol]), Context=>ASTNode)]) {
   import Grammar._
