@@ -155,7 +155,6 @@ class Grammar(val name: String, val rules: List[((NonTerminal, List[Symbol]), Co
     parseTable
   }
 
-//  val parseTable = constructParseTable
   val parseTable = GrammarPrecompute.loadParseTable(name)
 }
 

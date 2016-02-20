@@ -22,21 +22,21 @@ object MonaGrammar extends Grammar("mona", List(
 
   RHSNT -> List(Terminal(classTag[EqualsSign]), OptionalNewlinesNT, ExpressionNT) -> Fragments.extract(3),
 
-  ExpressionNT -> List(FunctionExpressionNT, ExpressionPrimeNT) -> Fragments.unitExpression,
-  ExpressionNT -> List(SimpleExpressionNT, ExpressionPrimeNT) -> Fragments.emptyNode,
+  ExpressionNT -> List(SimpleExpressionNT, ExpressionPrimeNT) -> Fragments.expression,
+  ExpressionNT -> List(FunctionExpressionNT, ExpressionPrimeNT) -> Fragments.expression,
   ExpressionPrimeNT -> List(Eta) -> Fragments.emptyNode,
   ExpressionPrimeNT -> List(OperatorNT, ExpressionNT) -> Fragments.infix,
 
+  SimpleExpressionNT -> List(Terminal(classTag[KeywordIf]), ExpressionNT, Terminal(classTag[KeywordThen]), ExpressionNT, Terminal(classTag[KeywordElse]), ExpressionNT) -> Fragments.ifExpression,
+
   OperatorNT -> List(Terminal(classTag[OperatorId])) -> Fragments.matched,
   OperatorNT -> List(Terminal(classTag[Backtick]), Terminal(classTag[LowerIdToken]), Terminal(classTag[Backtick])) -> Fragments.extract(2),
-
-  SimpleExpressionNT -> List(Terminal(classTag[KeywordIf]), ExpressionNT, Terminal(classTag[KeywordThen]), ExpressionNT, Terminal(classTag[KeywordElse]), ExpressionNT) -> Fragments.ifExpression,
 
   FunctionExpressionNT -> List(ArgumentNT, FunctionExpressionPrimeNT) -> Fragments.functionExpression,
   FunctionExpressionPrimeNT -> List(FunctionExpressionNT) -> Fragments.functionExpression,
   FunctionExpressionPrimeNT -> List(Eta) -> Fragments.emptyNode,
 
-  ArgumentNT -> List(Terminal(classTag[LowerIdToken])) -> Fragments.bindingExpression,
+  ArgumentNT -> List(Terminal(classTag[LowerIdToken])) -> Fragments.extract(1),
   ArgumentNT -> List(SimpleArgumentNT) -> Fragments.extract(1),
   SimpleArgumentNT -> List(LiteralNT) -> Fragments.extract(1),
   SimpleArgumentNT -> List(Terminal(classTag[OpenParens]), OptionalNewlinesNT, ExpressionNT, OptionalNewlinesNT, Terminal(classTag[CloseParens])) -> ((c)=>{ EmptyNode() /* extract Expression AST */ }),
