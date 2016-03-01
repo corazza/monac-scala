@@ -39,13 +39,13 @@ object MonaGrammar extends Grammar("mona", List(
   ArgumentNT -> List(Terminal(classTag[LowerIdToken])) -> Fragments.extract(1),
   ArgumentNT -> List(SimpleArgumentNT) -> Fragments.extract(1),
   SimpleArgumentNT -> List(LiteralNT) -> Fragments.extract(1),
-  SimpleArgumentNT -> List(Terminal(classTag[OpenParens]), OptionalNewlinesNT, ExpressionNT, OptionalNewlinesNT, Terminal(classTag[CloseParens])) -> ((c)=>{ EmptyNode() /* extract Expression AST */ }),
-  SimpleArgumentNT -> List(Terminal(classTag[OpenBlock]), OptionalNewlinesNT, StatementSequenceNT, Terminal(classTag[CloseBlock])) -> ((c)=>{ EmptyNode() /* extract Expression AST */ }),
+  SimpleArgumentNT -> List(Terminal(classTag[OpenParens]), OptionalNewlinesNT, ExpressionNT, OptionalNewlinesNT, Terminal(classTag[CloseParens])) -> Fragments.extract(3),
+  SimpleArgumentNT -> List(Terminal(classTag[OpenBlock]), OptionalNewlinesNT, StatementSequenceNT, Terminal(classTag[CloseBlock])) -> Fragments.extract(3),
 
   StatementSequenceNT -> List(Eta) -> Fragments.emptyNode,
-  StatementSequenceNT -> List(StatementNT, StatementSequencePrimeNT) -> Fragments.emptyNode,
+  StatementSequenceNT -> List(StatementNT, StatementSequencePrimeNT) -> Fragments.statementSequence,
   StatementSequencePrimeNT -> List(Eta) -> Fragments.emptyNode,
-  StatementSequencePrimeNT -> List(StatementSeparatorNT, StatementSequenceNT) -> Fragments.emptyNode,
+  StatementSequencePrimeNT -> List(StatementSeparatorNT, StatementSequenceNT) -> Fragments.extract(2),
 
   StatementSeparatorNT  -> List(Terminal(classTag[Newlines])) -> Fragments.emptyNode,
   StatementSeparatorNT  -> List(Terminal(classTag[SemiColon])) -> Fragments.emptyNode,
@@ -54,18 +54,22 @@ object MonaGrammar extends Grammar("mona", List(
   StatementNT -> List(SimpleExpressionNT) -> Fragments.extract(1),
 
   DefinitionOrExpressionNT -> List(SimpleArgumentNT) -> Fragments.extract(1),
-  DefinitionOrExpressionNT -> List(Terminal(classTag[LowerIdToken]), DefinitionOrExpressionRepeatIdNT, DefinitionOrExpressionPrimeNT) -> Fragments.emptyNode,
-  DefinitionOrExpressionRepeatIdNT -> List(Eta) -> Fragments.emptyNode,
+  DefinitionOrExpressionNT -> List(Terminal(classTag[LowerIdToken]), DefinitionOrExpressionRepeatIdNT, DefinitionOrExpressionPrimeNT) -> Fragments.definitionOrFE,
+
+  DefinitionOrExpressionRepeatIdNT -> List(Eta) -> Fragments.repeatId,
   DefinitionOrExpressionRepeatIdNT -> List(Terminal(classTag[LowerIdToken]), DefinitionOrExpressionRepeatIdNT) -> Fragments.repeatId,
+
   DefinitionOrExpressionPrimeNT -> List(Eta) -> Fragments.emptyNode,
-  DefinitionOrExpressionPrimeNT -> List(SimpleArgumentNT, DefinitionOrExpressionPrimePrimeNT) -> Fragments.emptyNode, // wrap in a special node
-  DefinitionOrExpressionPrimePrimeNT -> List(FunctionExpressionPrimeNT) -> Fragments.emptyNode,
-  DefinitionOrExpressionPrimePrimeNT -> List(OperatorNT, ExpressionNT) -> Fragments.emptyNode,
+
+  DefinitionOrExpressionPrimeNT -> List(SimpleArgumentNT, DefinitionOrExpressionPrimePrimeNT) -> Fragments.simpleContinuation,
+  DefinitionOrExpressionPrimePrimeNT -> List(FunctionExpressionPrimeNT) -> Fragments.extract(1),
+  DefinitionOrExpressionPrimePrimeNT -> List(OperatorNT, ExpressionNT) -> Fragments.infix,
+
   DefinitionOrExpressionPrimeNT -> List(RHSNT) -> Fragments.extract(1),
 
-  LiteralNT -> List(Terminal(classTag[NumLiteral])) -> Fragments.matched,
-  LiteralNT -> List(Terminal(classTag[CharLiteral])) -> Fragments.matched,
-  LiteralNT -> List(Terminal(classTag[StringLiteral])) -> Fragments.matched
+  LiteralNT -> List(Terminal(classTag[NumLiteral])) -> Fragments.literalExpression,
+  LiteralNT -> List(Terminal(classTag[CharLiteral])) -> Fragments.literalExpression,
+  LiteralNT -> List(Terminal(classTag[StringLiteral])) -> Fragments.literalExpression
 ))
 
 object StartNT extends NonTerminal

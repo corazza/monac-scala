@@ -18,8 +18,7 @@ case class Operator(lexeme: ValueLexeme) extends Identifier(lexeme)
 
 case class InfixRight(operator: Operator, expression: Expression) extends ASTNode
 
-case class FLHS(identifier: String, arguments: ArgumentList) extends ASTNode
-case class ArgumentList(arguments: List[String]) extends ASTNode
+case class FLHS(identifier: LowerId, arguments: ArgumentList) extends ASTNode
 
 abstract class Statement extends ASTNode
 case class Definition(name: String, symbol: org.monalang.monac.symbol.Symbol) extends Statement
@@ -41,3 +40,12 @@ case class StatementSequence(override val scope: SymbolTable, statements: List[S
 case class UnitExpression() extends Expression(new SymbolTable())
 case class FunctionApplication(parentScope: SymbolTable, function: Expression, argument: Expression) extends Expression(ParentScopeConnector.getChildScope(parentScope))
 case class BindingExpression(parentScope: SymbolTable, identifier: Identifier) extends Expression(ParentScopeConnector.getChildScope(parentScope))
+case class LiteralExpression(parentScope: SymbolTable, literal: LiteralNode) extends Expression(ParentScopeConnector.getChildScope(parentScope))
+
+// obvious sugar
+case class IfExpression(parentScope: SymbolTable, conditional: Expression, branch1: Expression, branch2: Expression) extends Expression(ParentScopeConnector.getChildScope(parentScope))
+
+// structural
+case class ArgumentList(arguments: List[LowerId]) extends ASTNode
+case class IdList(ids: List[Identifier]) extends ASTNode
+case class SimpleContinuation(simpleArgument: Expression, continuation: ASTNode) extends ASTNode

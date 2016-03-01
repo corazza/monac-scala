@@ -2,7 +2,23 @@ package org.monalang.monac.parsing
 
 import org.monalang.monac.symbol._
 
+import scala.util.Try
+
+object ExtraFragments {
+  def functionDefinition(flhs: FLHS, expression: Expression) = {
+    for (id <- flhs.arguments.arguments) expression.scope.addSymbol(id.lexeme.data, ArgumentMarker())
+    Definition(flhs.identifier.lexeme.data, SymbolToAST(expression))
+  }
+
+  def callFromIds(scope: SymbolTable, ids: List[Identifier], expression: Expression) =
+    ids.foldRight[Expression](expression)((id, call) =>
+      FunctionApplication(scope, BindingExpression(scope, id), call))
+}
+
 object Fragments {
+  private def co[A](i: Int)(implicit c: Context): A = c.elements(i-1).asInstanceOf[A]
+  private def ge(i: Int)(implicit c: Context): ASTNode = c.elements(i-1)
+
   def emptyNode(c: Context) = EmptyNode()
   def unitExpression(c: Context) = UnitExpression()
   def extract(n: Int)(c: Context) = c.elements(n-1)
@@ -24,51 +40,122 @@ object Fragments {
   }
 
   def functionDefinition(c: Context) = {
-    val flhs = c.elements(0).asInstanceOf[FLHS]
-    val expression = c.elements(1).asInstanceOf[Expression]
-    for (id <- flhs.arguments.arguments) expression.scope.addSymbol(id, ArgumentMarker())
-    Definition(flhs.identifier, SymbolToAST(expression))
+    implicit val c2 = c
+    val flhs = co[FLHS](1)
+    val expression = co[Expression](2)
+    ExtraFragments.functionDefinition(flhs, expression)
   }
 
-  def FLHSNT(c: Context) =
-    FLHS(c.elements(0).asInstanceOf[LowerId].lexeme.data, c.elements(1).asInstanceOf[ArgumentList])
+  def FLHSNT(c: Context) = {
+    implicit val c2 = c
+    FLHS(co[LowerId](1), co[ArgumentList](2))
+  }
 
-  def argumentListHead(c: Context) =
-    if (c.elements(1).isInstanceOf[EmptyNode]) ArgumentList(List(c.elements(0).asInstanceOf[LowerId].lexeme.data))
-    else ArgumentList(c.elements(0).asInstanceOf[LowerId].lexeme.data +: c.elements(1).asInstanceOf[ArgumentList].arguments)
+  def argumentListHead(c: Context) = {
+    implicit val c2 = c
+    if (ge(2).isInstanceOf[EmptyNode]) ArgumentList(List(co[LowerId](1)))
+    else ArgumentList(co[LowerId](1) +: co[ArgumentList](2).arguments)
+  }
 
-  def expression(c: Context) =
-    if (c.elements(1).isInstanceOf[EmptyNode]) c.elements(0)
+  def expression(c: Context) = {
+    implicit val c2 = c
+    if (ge(2).isInstanceOf[EmptyNode]) ge(1)
     else {
-      val expression1 = c.elements(0).asInstanceOf[Expression]
-      val InfixRight(operator, expression2) = c.elements(1).asInstanceOf[InfixRight]
-      // TODO operator fixity
-      // TODO scoping
+      val expression1 = co[Expression](1)
+      val InfixRight(operator, expression2) = co[InfixRight](2)
       val firstCall = FunctionApplication(new SymbolTable(), BindingExpression(new SymbolTable(), operator), expression1)
       FunctionApplication(new SymbolTable(), firstCall, expression2)
     }
+  }
 
-  def infix(c: Context) =
-    InfixRight(c.elements(0).asInstanceOf[Operator], c.elements(1).asInstanceOf[Expression])
+  def infix(c: Context) = {
+    implicit val c2 = c
+    InfixRight(co[Operator](1), co[Expression](2))
+  }
 
-  def functionExpression(c: Context) = {
-    UnitExpression()
+  def functionExpression(c: Context): ASTNode = {
+    implicit val c2 = c
+
+    val first = ge(1) match {
+      case literal: LiteralNode => LiteralExpression(new SymbolTable(), literal)
+      case binding: Identifier => BindingExpression(new SymbolTable(), binding)
+      case expression: Expression => expression
+      case ExpressionStatement(expression) => expression
+      case n: EmptyNode => return n
+    }
+
+    val second = Try(ge(2)).toOption
+    if (second.isDefined && second.get.isInstanceOf[Expression]) FunctionApplication(new SymbolTable(), first, second.get.asInstanceOf[Expression])
+    else first
   }
 
   def ifExpression(c: Context) = {
-    UnitExpression()
+    implicit val c2 = c
+    val conditional = co[Expression](2)
+    val branch1 = co[Expression](4)
+    val branch2 = co[Expression](6)
+    IfExpression(new SymbolTable(), conditional, branch1, branch2)
   }
 
-  def expressionBlock(c: Context) = {
-    UnitExpression()
+  def statementSequence(c: Context) = {
+    implicit val c2 = c
+
+    val first = if (ge(1).isInstanceOf[Expression]) ExpressionStatement(co[Expression](1))
+                else co[Statement](1)
+
+    val second = co[ASTNode](2)
+
+    if (second.isInstanceOf[EmptyNode]) first
+    else second match {
+      case StatementSequence(scope, statements) => StatementSequence(scope, first +: statements)
+      case s: Statement => StatementSequence(new SymbolTable(), List(first, s))
+    }
   }
 
-  def declarationOrFE(c: Context) = {
-    // return combine PRIME and repeat
-    EmptyNode()
+  def definitionOrFE(c: Context) = {
+    implicit val c2 = c
+
+    val ids = co[Identifier](1) +: co[IdList](2).ids
+
+    ge(3) match {
+      case expression: Expression => {
+        val flhs = FLHS(co[LowerId](1), ArgumentList(co[IdList](2).ids.asInstanceOf[List[LowerId]]))
+        ExtraFragments.functionDefinition(flhs, expression)
+      }
+      case _: EmptyNode => {
+        val callScope = new SymbolTable()
+        ExtraFragments.callFromIds(callScope, ids.dropRight(1), BindingExpression(callScope, ids.last))
+      }
+      case SimpleContinuation(simpleArgument, continuation) => continuation match {
+        case InfixRight(operator, expression) => {
+          val callScope = new SymbolTable()
+          val call = ExtraFragments.callFromIds(callScope, ids, simpleArgument)
+          val firstOpCall = FunctionApplication(new SymbolTable(), BindingExpression(new SymbolTable(), operator), call)
+          FunctionApplication(new SymbolTable(), firstOpCall, expression)
+        }
+        case call1: FunctionApplication => {
+          val callScope = new SymbolTable()
+          val call2 = ExtraFragments.callFromIds(callScope, ids, simpleArgument)
+          FunctionApplication(callScope, call2, call1)
+        }
+        case n: EmptyNode =>ExtraFragments.callFromIds(new SymbolTable(), ids, simpleArgument)
+      }
+    }
+  }
+
+  def simpleContinuation(c: Context) = {
+    implicit val c2 = c
+    SimpleContinuation(co[Expression](1), ge(2))
   }
 
   def repeatId(c: Context) = {
-    EmptyNode()
+    implicit val c2 = c
+    if (c.elements.length > 1) IdList(co[LowerId](1) +: co[IdList](2).ids)
+    else IdList(List())
+  }
+
+  def literalExpression(c: Context) = {
+    implicit val c2 = c
+    LiteralExpression(new SymbolTable(), co[LiteralNode](1))
   }
 }
