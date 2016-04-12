@@ -6,8 +6,11 @@ import scala.util.Try
 
 object ExtraFragments {
   def functionDefinition(flhs: FLHS, expression: Expression) = {
-    for (id <- flhs.arguments.arguments) expression.scope.addSymbol(id.lexeme.data, ArgumentMarker())
-    Definition(flhs.identifier.lexeme.data, SymbolToAST(expression))
+    val symbol = SymbolToAST(expression)
+    for (id <- flhs.arguments.arguments)
+      expression.scope.addSymbol(id.lexeme.data, ArgumentMarker())
+    expression.scope.addSymbol(flhs.identifier.lexeme.data, symbol)
+    Definition(flhs.identifier.lexeme.data, symbol)
   }
 
   def callFromIds(scope: SymbolTable, ids: List[Identifier], expression: Expression) =
@@ -26,6 +29,7 @@ object Fragments {
 
   def start(c: Context) = {
     val definition = c.elements(0).asInstanceOf[Definition]
+
     if (c.elements(1).isInstanceOf[EmptyNode]) {
       val scope = new SymbolTable()
       scope.addSymbol(definition.name, definition.symbol)
@@ -59,12 +63,13 @@ object Fragments {
 
   def expression(c: Context) = {
     implicit val c2 = c
-    if (ge(2).isInstanceOf[EmptyNode]) ge(1)
+    if (c.elements.length == 1 || ge(2).isInstanceOf[EmptyNode]) ge(1)
     else {
+      val callScope = new SymbolTable()
       val expression1 = co[Expression](1)
       val InfixRight(operator, expression2) = co[InfixRight](2)
-      val firstCall = FunctionApplication(new SymbolTable(), BindingExpression(new SymbolTable(), operator), expression1)
-      FunctionApplication(new SymbolTable(), firstCall, expression2)
+      val firstCall = FunctionApplication(callScope, BindingExpression(callScope, operator), expression1)
+      FunctionApplication(callScope, firstCall, expression2)
     }
   }
 
@@ -100,8 +105,18 @@ object Fragments {
   def statementSequence(c: Context) = {
     implicit val c2 = c
 
-    val first = if (ge(1).isInstanceOf[Expression]) ExpressionStatement(co[Expression](1))
-                else co[Statement](1)
+    val first = ge(1) match {
+      case _: Expression => ExpressionStatement(co[Expression](1))
+      case s: Statement => s
+      case SimpleContinuation(simpleArgument, continuation) => ExpressionStatement(continuation match {
+        case InfixRight(operator, expression) => {
+          val firstOpCall = FunctionApplication(new SymbolTable(), BindingExpression(new SymbolTable(), operator), expression)
+          FunctionApplication(new SymbolTable(), firstOpCall, simpleArgument)
+        }
+        case fa @ FunctionApplication(parentScope, function, argument) => FunctionApplication(parentScope, simpleArgument, fa)
+        case EmptyNode() => simpleArgument
+      })
+    }
 
     val second = co[ASTNode](2)
 
@@ -125,6 +140,12 @@ object Fragments {
       case _: EmptyNode => {
         val callScope = new SymbolTable()
         ExtraFragments.callFromIds(callScope, ids.dropRight(1), BindingExpression(callScope, ids.last))
+      }
+      case InfixRight(operator, expression) => {
+        val callScope = new SymbolTable()
+        val idCall = ExtraFragments.callFromIds(callScope, ids.dropRight(1), BindingExpression(callScope, ids.last))
+        val firstOpCall = FunctionApplication(callScope, BindingExpression(new SymbolTable(), operator), expression)
+        FunctionApplication(callScope, firstOpCall, idCall)
       }
       case SimpleContinuation(simpleArgument, continuation) => continuation match {
         case InfixRight(operator, expression) => {

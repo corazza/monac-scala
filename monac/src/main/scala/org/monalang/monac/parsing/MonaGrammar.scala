@@ -22,7 +22,7 @@ object MonaGrammar extends Grammar("mona", List(
 
   RHSNT -> List(Terminal(classTag[EqualsSign]), OptionalNewlinesNT, ExpressionNT) -> Fragments.extract(3),
 
-  ExpressionNT -> List(SimpleExpressionNT, ExpressionPrimeNT) -> Fragments.expression,
+  ExpressionNT -> List(SimpleExpressionNT) -> Fragments.expression,
   ExpressionNT -> List(FunctionExpressionNT, ExpressionPrimeNT) -> Fragments.expression,
   ExpressionPrimeNT -> List(Eta) -> Fragments.emptyNode,
   ExpressionPrimeNT -> List(OperatorNT, ExpressionNT) -> Fragments.infix,
@@ -53,15 +53,16 @@ object MonaGrammar extends Grammar("mona", List(
   StatementNT -> List(DefinitionOrExpressionNT) -> Fragments.extract(1),
   StatementNT -> List(SimpleExpressionNT) -> Fragments.extract(1),
 
-  DefinitionOrExpressionNT -> List(SimpleArgumentNT) -> Fragments.extract(1),
+  DefinitionOrExpressionNT -> List(DefinitionOrExpressionPrimeNT) -> Fragments.extract(1),
   DefinitionOrExpressionNT -> List(Terminal(classTag[LowerIdToken]), DefinitionOrExpressionRepeatIdNT, DefinitionOrExpressionPrimeNT) -> Fragments.definitionOrFE,
 
   DefinitionOrExpressionRepeatIdNT -> List(Eta) -> Fragments.repeatId,
   DefinitionOrExpressionRepeatIdNT -> List(Terminal(classTag[LowerIdToken]), DefinitionOrExpressionRepeatIdNT) -> Fragments.repeatId,
 
   DefinitionOrExpressionPrimeNT -> List(Eta) -> Fragments.emptyNode,
-
   DefinitionOrExpressionPrimeNT -> List(SimpleArgumentNT, DefinitionOrExpressionPrimePrimeNT) -> Fragments.simpleContinuation,
+  DefinitionOrExpressionPrimeNT -> List(OperatorNT, ExpressionNT) -> Fragments.infix,
+
   DefinitionOrExpressionPrimePrimeNT -> List(FunctionExpressionPrimeNT) -> Fragments.extract(1),
   DefinitionOrExpressionPrimePrimeNT -> List(OperatorNT, ExpressionNT) -> Fragments.infix,
 

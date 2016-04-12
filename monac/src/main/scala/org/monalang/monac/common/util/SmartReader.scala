@@ -2,8 +2,6 @@ package org.monalang.monac.common.util
 
 import java.io.InputStream
 
-// TODO docs
-
 object SmartReader {
   def readWhole(inputStream: InputStream) = readUntil(inputStream, (-1).asInstanceOf[Char])
 
