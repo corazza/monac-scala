@@ -5,7 +5,7 @@ import org.monalang.monac.parsing.ASTNode
 // entities that can be referred to through source code
 abstract class Symbol
 
-case class SymbolToAST(node: ASTNode) extends Symbol
+case class ASTSymbol(node: ASTNode) extends Symbol
 
 case class ArgumentMarker() extends Symbol
 

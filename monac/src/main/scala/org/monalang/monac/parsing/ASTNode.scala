@@ -20,32 +20,22 @@ case class InfixRight(operator: Operator, expression: Expression) extends ASTNod
 
 case class FLHS(identifier: LowerId, arguments: ArgumentList) extends ASTNode
 
-abstract class Statement extends ASTNode
-case class Definition(name: String, symbol: org.monalang.monac.symbol.Symbol) extends Statement
-case class ExpressionStatement(expression: Expression) extends Statement
+case class DefinitionSequence(scope: SymbolTable, definitions: List[Definition]) extends ASTNode
 
-abstract class ScopedNode(val scope: SymbolTable) extends ASTNode
-case class DefinitionSequence(override val scope: SymbolTable, definitions: List[Definition]) extends ScopedNode(scope)
+class Statement(val parentScopeCarrier: SymbolTable) extends ASTNode
+case class Definition(override val parentScopeCarrier: SymbolTable, name: String, symbol: org.monalang.monac.symbol.Symbol) extends Statement(parentScopeCarrier)
+case class ExpressionStatement(override val parentScopeCarrier: SymbolTable, expression: Expression) extends Statement(parentScopeCarrier)
 
-object ParentScopeConnector {
-  def getChildScope(parentScope: SymbolTable) = {
-    val scope = new SymbolTable()
-    scope.parent = Some(parentScope)
-    scope
-  }
-}
+abstract class Expression(val parentScope: SymbolTable) extends ASTNode
 
-abstract class Expression(scope: SymbolTable) extends ScopedNode(scope)
-case class StatementSequence(override val scope: SymbolTable, statements: List[Statement]) extends Expression(scope)
-case class UnitExpression() extends Expression(new SymbolTable())
-case class FunctionApplication(parentScope: SymbolTable, function: Expression, argument: Expression) extends Expression(ParentScopeConnector.getChildScope(parentScope))
-case class BindingExpression(parentScope: SymbolTable, identifier: Identifier) extends Expression(ParentScopeConnector.getChildScope(parentScope))
-case class LiteralExpression(parentScope: SymbolTable, literal: LiteralNode) extends Expression(ParentScopeConnector.getChildScope(parentScope))
+case class Block(override val parentScope: SymbolTable, scope: SymbolTable, statements: List[Statement]) extends Expression(parentScope)
+case class UnitExpression(override val parentScope: SymbolTable) extends Expression(parentScope)
+case class FunctionApplication(override val parentScope: SymbolTable, function: Expression, argument: Expression) extends Expression(parentScope)
+case class BindingExpression(override val parentScope: SymbolTable, identifier: Identifier) extends Expression(parentScope)
+case class LiteralExpression(override val parentScope: SymbolTable, literal: LiteralNode) extends Expression(parentScope)
 
-// obvious sugar
-case class IfExpression(parentScope: SymbolTable, conditional: Expression, branch1: Expression, branch2: Expression) extends Expression(ParentScopeConnector.getChildScope(parentScope))
+case class IfExpression(override val parentScope: SymbolTable, conditional: Expression, branch1: Expression, branch2: Expression) extends Expression(parentScope)
 
-// structural
 case class ArgumentList(arguments: List[LowerId]) extends ASTNode
 case class IdList(ids: List[Identifier]) extends ASTNode
 case class SimpleContinuation(simpleArgument: Expression, continuation: ASTNode) extends ASTNode
