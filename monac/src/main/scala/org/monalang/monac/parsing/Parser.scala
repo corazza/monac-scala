@@ -58,7 +58,4 @@ case class Parser(lexer: Lexer) {
   }
 
   val parsed = parse(StartNT)
-
-  println(parsed)
-  println(parsed.asInstanceOf[DefinitionSequence].scope.lookup("anotherfunction"))
 }

@@ -6,15 +6,15 @@ import org.monalang.monac.symbol.SymbolTable
 abstract class ASTNode
 case class EmptyNode() extends ASTNode
 
-abstract class LiteralNode(value: ValueLexeme) extends ASTNode
-case class Num(lexeme: ValueLexeme) extends LiteralNode(lexeme)
-case class Char(lexeme: ValueLexeme) extends LiteralNode(lexeme)
-case class StringNode(lexeme: ValueLexeme) extends LiteralNode(lexeme)
+abstract class LiteralNode(val lexeme: ValueLexeme) extends ASTNode
+case class Num(override val lexeme: ValueLexeme) extends LiteralNode(lexeme)
+case class Char(override val lexeme: ValueLexeme) extends LiteralNode(lexeme)
+case class StringNode(override val lexeme: ValueLexeme) extends LiteralNode(lexeme)
 
-abstract class Identifier(lexeme: ValueLexeme) extends ASTNode
-case class LowerId(lexeme: ValueLexeme) extends Identifier(lexeme)
-case class UpperId(lexeme: ValueLexeme) extends Identifier(lexeme)
-case class Operator(lexeme: ValueLexeme) extends Identifier(lexeme)
+abstract class Identifier(val lexeme: ValueLexeme) extends ASTNode
+case class LowerId(override val lexeme: ValueLexeme) extends Identifier(lexeme)
+case class UpperId(override val lexeme: ValueLexeme) extends Identifier(lexeme)
+case class Operator(override val lexeme: ValueLexeme) extends Identifier(lexeme)
 
 case class InfixRight(operator: Operator, expression: Expression) extends ASTNode
 

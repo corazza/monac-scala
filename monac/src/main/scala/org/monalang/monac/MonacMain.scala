@@ -13,4 +13,6 @@ object MonacMain extends App {
   val readers = sources map SourceReader
   val lexers = readers map Lexer
   val parsers = lexers map Parser
+
+  println(parsers.head.parsed)
 }
