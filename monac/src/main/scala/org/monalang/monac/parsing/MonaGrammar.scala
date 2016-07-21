@@ -1,6 +1,7 @@
 package org.monalang.monac.parsing
 
 import org.monalang.monac.lexing._
+
 import scala.reflect._
 
 object MonaGrammar extends Grammar("mona", List(
@@ -39,7 +40,9 @@ object MonaGrammar extends Grammar("mona", List(
   ArgumentNT -> List(Terminal(classTag[LowerIdToken])) -> Fragments.extract(1),
   ArgumentNT -> List(SimpleArgumentNT) -> Fragments.extract(1),
   SimpleArgumentNT -> List(LiteralNT) -> Fragments.extract(1),
-  SimpleArgumentNT -> List(Terminal(classTag[OpenParens]), OptionalNewlinesNT, ExpressionNT, OptionalNewlinesNT, Terminal(classTag[CloseParens])) -> Fragments.extract(3),
+  SimpleArgumentNT -> List(Terminal(classTag[OpenParens]), OptionalNewlinesNT, SimpleArgumentPrimeNT) -> Fragments.extract(3),
+  SimpleArgumentPrimeNT -> List(ExpressionNT, OptionalNewlinesNT, Terminal(classTag[CloseParens])) -> Fragments.extract(1),
+  SimpleArgumentPrimeNT -> List(Terminal(classTag[CloseParens])) -> Fragments.emptyNode,
   SimpleArgumentNT -> List(Terminal(classTag[OpenBlock]), OptionalNewlinesNT, StatementSequenceNT, Terminal(classTag[CloseBlock])) -> Fragments.extract(3),
 
   StatementSequenceNT -> List(Eta) -> Fragments.emptyNode,
@@ -100,4 +103,5 @@ object FunctionExpressionNT extends NonTerminal
 object FunctionExpressionPrimeNT extends NonTerminal
 object ArgumentNT extends NonTerminal
 object SimpleArgumentNT extends NonTerminal
+object SimpleArgumentPrimeNT extends NonTerminal
 object LiteralNT extends NonTerminal

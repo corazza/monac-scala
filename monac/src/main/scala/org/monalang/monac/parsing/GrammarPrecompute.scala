@@ -70,6 +70,7 @@ object GrammarPrecompute extends App {
       case "FunctionExpressionPrimeNT" => FunctionExpressionPrimeNT
       case "ArgumentNT" => ArgumentNT
       case "SimpleArgumentNT" => SimpleArgumentNT
+      case "SimpleArgumentPrimeNT" => SimpleArgumentPrimeNT
       case "LiteralNT" => LiteralNT
       case _ => StartNT // error
     }

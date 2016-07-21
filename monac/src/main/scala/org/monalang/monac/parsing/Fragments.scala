@@ -1,5 +1,6 @@
 package org.monalang.monac.parsing
 
+import org.monalang.monac.parsing
 import org.monalang.monac.symbol._
 
 import scala.util.Try
@@ -17,6 +18,8 @@ object ExtraFragments {
     ids.foldRight[Expression](expression)((id, call) =>
       FunctionApplication(scope, BindingExpression(scope, id), call))
 }
+
+// TODO: get symbol tables to build correctly, then code emission
 
 object Fragments {
   private def co[A](i: Int)(implicit c: Context): A = c.elements(i-1).asInstanceOf[A]
@@ -101,7 +104,7 @@ object Fragments {
     IfExpression(new SymbolTable(), conditional, branch1, branch2)
   }
 
-  def statementSequence(c: Context) = {
+  def statementSequence(c: Context): ASTNode = {
     implicit val c2 = c
 
     val first = ge(1) match {
@@ -115,6 +118,7 @@ object Fragments {
         case fa @ FunctionApplication(parentScope, function, argument) => FunctionApplication(parentScope, simpleArgument, fa)
         case EmptyNode() => simpleArgument
       })
+      case EmptyNode() => return EmptyNode()
     }
 
     val second = co[ASTNode](2)
@@ -165,7 +169,11 @@ object Fragments {
 
   def simpleContinuation(c: Context) = {
     implicit val c2 = c
-    SimpleContinuation(co[Expression](1), ge(2))
+    if (ge(1).isInstanceOf[EmptyNode]) parsing.EmptyNode()
+    else SimpleContinuation(ge(1) match {
+      case e: Expression => e
+      case ExpressionStatement(parentScopeCarrier, expression) => expression // (expression already has proper scope)
+    }, ge(2))
   }
 
   def repeatId(c: Context) = {

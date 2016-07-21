@@ -36,11 +36,12 @@ class Grammar(val name: String, val rules: List[((NonTerminal, List[Symbol]), Co
       while (pass && i < in.length) {
         val elfirst = getFirst(in(i))
         result ++= elfirst filter (_ != Eta)
+        pass = elfirst.contains(Eta)
         if (!elfirst.contains(Eta)) pass = false
         else i += 1
       }
 
-      if (pass && i == in.length && in.length != 0) result += Eta
+      if (pass && i == in.length && in.nonEmpty) result += Eta
 
       result
     }
@@ -124,7 +125,7 @@ class Grammar(val name: String, val rules: List[((NonTerminal, List[Symbol]), Co
                 added = true
               }
 
-              if (!followsnt.subsetOf(followse) && (firstAfteri.contains(Eta) || followse.isEmpty)) {
+              if (!followsnt.subsetOf(followse) && (firstAfteri.isEmpty || firstAfteri.contains(Eta) || followse.isEmpty)) {
                 followse ++= followsnt
                 added = true
               }
@@ -138,7 +139,7 @@ class Grammar(val name: String, val rules: List[((NonTerminal, List[Symbol]), Co
       }
     }
 
-    for (rule <- 0 to rules.length - 1) {
+    for (rule <- rules.indices) {
       val nonterminal = rules(rule)._1._1
       val elements = rules(rule)._1._2
       val elsfirst = firstMult(elements)
@@ -147,6 +148,7 @@ class Grammar(val name: String, val rules: List[((NonTerminal, List[Symbol]), Co
 
       if (elsfirst.contains(Eta)) {
         val followsnt = getFollow(nonterminal)
+
         for (terminal <- followsnt) addEntry(parseTable, nonterminal, terminal, rule)
         if (followsnt.contains(End)) addEntry(parseTable, nonterminal, End, rule)
       }
@@ -156,6 +158,7 @@ class Grammar(val name: String, val rules: List[((NonTerminal, List[Symbol]), Co
   }
 
   val parseTable = GrammarPrecompute.loadParseTable(name)
+//  val parseTable = constructParseTable()
 }
 
 object Grammar {

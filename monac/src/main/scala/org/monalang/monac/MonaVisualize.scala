@@ -27,7 +27,7 @@ object MonaVisualize extends App {
       val exp = "fill-color: rgb(0, 0, 0);"
       val call = "fill-color: rgb(255, 0, 255);"
       val cnst = "fill-color: rgb(255, 69, 0);"
-      val ident = "fill-color: rgb(0, 128, 255);"
+      val ident = "fill-color: rgb(0, 255, 255);"
     }
 
     def displayNode(node: ASTNode, color: String, order: Int): String = {
@@ -54,18 +54,18 @@ object MonaVisualize extends App {
           graph.addEdge(name + childArgument, name, childArgument).asInstanceOf[AbstractEdge]
         }
 
+        case ExpressionStatement(parentScopeCarrier, expression) => {
+          val childExpression = displayNode(expression, Color.exp, 0)
+          graph.addEdge(name + childExpression, name, childExpression).asInstanceOf[AbstractEdge]
+        }
+
         case BindingExpression(parentScope, identifier) => {
           vnode.changeAttribute("ui.label", identifier.lexeme.data.toString)
-//          vnode.addAttribute("ui.style", Color.ident)
+          vnode.addAttribute("ui.style", Color.ident)
         }
         case LiteralExpression(parentScope, literalNode) => {
           vnode.changeAttribute("ui.label", literalNode.lexeme.data.toString)
           vnode.addAttribute("ui.style", Color.cnst)
-        }
-
-        case ExpressionStatement(parentScopeCarrier, expression) => {
-          val childExpression = displayNode(expression, Color.exp, 0)
-          graph.addEdge(name + childExpression, name, childExpression).asInstanceOf[AbstractEdge]
         }
       }
 
