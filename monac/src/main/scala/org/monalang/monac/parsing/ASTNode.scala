@@ -20,22 +20,21 @@ case class InfixRight(operator: Operator, expression: Expression) extends ASTNod
 
 case class FLHS(identifier: LowerId, arguments: ArgumentList) extends ASTNode
 
-case class DefinitionSequence(scope: SymbolTable, definitions: List[Definition]) extends ASTNode
-
-class Statement(val parentScopeCarrier: SymbolTable) extends ASTNode
-case class Definition(override val parentScopeCarrier: SymbolTable, name: String, symbol: org.monalang.monac.symbol.Symbol) extends Statement(parentScopeCarrier)
-case class ExpressionStatement(override val parentScopeCarrier: SymbolTable, expression: Expression) extends Statement(parentScopeCarrier)
-
-abstract class Expression(val parentScope: SymbolTable) extends ASTNode
-
-case class Block(override val parentScope: SymbolTable, scope: SymbolTable, statements: List[Statement]) extends Expression(parentScope)
-case class UnitExpression(override val parentScope: SymbolTable) extends Expression(parentScope)
-case class FunctionApplication(override val parentScope: SymbolTable, function: Expression, argument: Expression) extends Expression(parentScope)
-case class BindingExpression(override val parentScope: SymbolTable, identifier: Identifier) extends Expression(parentScope)
-case class LiteralExpression(override val parentScope: SymbolTable, literal: LiteralNode) extends Expression(parentScope)
-
-case class IfExpression(override val parentScope: SymbolTable, conditional: Expression, branch1: Expression, branch2: Expression) extends Expression(parentScope)
-
 case class ArgumentList(arguments: List[LowerId]) extends ASTNode
 case class IdList(ids: List[Identifier]) extends ASTNode
 case class SimpleContinuation(simpleArgument: Expression, continuation: ASTNode) extends ASTNode
+
+
+case class DefinitionSequence(scope: SymbolTable, definitions: List[Definition]) extends ASTNode
+
+class Statement extends ASTNode
+case class Definition(scope: SymbolTable, name: String, symbol: org.monalang.monac.symbol.Symbol) extends Statement
+case class ExpressionStatement(expression: Expression) extends Statement
+
+abstract class Expression extends ASTNode
+object UnitExpression extends Expression
+case class BindingExpression(identifier: Identifier) extends Expression
+case class LiteralExpression(literal: LiteralNode) extends Expression
+case class ScopedExpression(scope: SymbolTable, statements: List[Statement]) extends Expression
+case class FunctionApplication(function: Expression, argument: Expression) extends Expression
+case class IfExpression(conditional: Expression, branch1: Expression, branch2: Expression) extends Expression

@@ -42,28 +42,28 @@ object MonaVisualize extends App {
       }
 
       node match {
-        case Block(parentScope, scope, statements) => for (i <- 0 to statements.length - 1) {
+        case ScopedExpression(scope, statements) => for (i <- 0 to statements.length - 1) {
           val child = displayNode(statements(i), Color.exp, i+1)
           graph.addEdge(name + child, name, child).asInstanceOf[AbstractEdge] // scala/java/graphstream bug
         }
 
-        case FunctionApplication(parentScope, expression, argument) => {
+        case FunctionApplication(expression, argument) => {
           val childExpression = displayNode(expression, Color.call, 0)
           val childArgument = displayNode(argument, Color.exp, 0)
           graph.addEdge(name + childExpression, name, childExpression).asInstanceOf[AbstractEdge]
           graph.addEdge(name + childArgument, name, childArgument).asInstanceOf[AbstractEdge]
         }
 
-        case ExpressionStatement(parentScopeCarrier, expression) => {
+        case ExpressionStatement(expression) => {
           val childExpression = displayNode(expression, Color.exp, 0)
           graph.addEdge(name + childExpression, name, childExpression).asInstanceOf[AbstractEdge]
         }
 
-        case BindingExpression(parentScope, identifier) => {
+        case BindingExpression(identifier) => {
           vnode.changeAttribute("ui.label", identifier.lexeme.data.toString)
           vnode.addAttribute("ui.style", Color.ident)
         }
-        case LiteralExpression(parentScope, literalNode) => {
+        case LiteralExpression(literalNode) => {
           vnode.changeAttribute("ui.label", literalNode.lexeme.data.toString)
           vnode.addAttribute("ui.style", Color.cnst)
         }

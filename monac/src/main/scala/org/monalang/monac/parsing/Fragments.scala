@@ -8,18 +8,25 @@ import scala.util.Try
 object ExtraFragments {
   def functionDefinition(flhs: FLHS, expression: Expression) = {
     val symbol = ASTSymbol(expression)
+    val definitionScope = new SymbolTable()
+
     for (id <- flhs.arguments.arguments)
-      expression.parentScope.addSymbol(id.lexeme.data, ArgumentMarker())
-    expression.parentScope.addSymbol(flhs.identifier.lexeme.data, symbol)
-    Definition(expression.parentScope, flhs.identifier.lexeme.data, symbol)
+      definitionScope.addSymbol(id.lexeme.data, ArgumentMarker())
+
+    definitionScope.addSymbol(flhs.identifier.lexeme.data, symbol)
+
+    expression match {
+      case ScopedExpression(scope, _) => scope.parent = Some(definitionScope)
+      case _ => Unit
+    }
+
+    Definition(definitionScope, flhs.identifier.lexeme.data, symbol)
   }
 
-  def callFromIds(scope: SymbolTable, ids: List[Identifier], expression: Expression) =
+  def callFromIds(ids: List[Identifier], expression: Expression) =
     ids.foldRight[Expression](expression)((id, call) =>
-      FunctionApplication(scope, BindingExpression(scope, id), call))
+      FunctionApplication(BindingExpression(id), call))
 }
-
-// TODO: get symbol tables to build correctly, then code emission
 
 object Fragments {
   private def co[A](i: Int)(implicit c: Context): A = c.elements(i-1).asInstanceOf[A]
@@ -32,17 +39,20 @@ object Fragments {
   def start(c: Context) = {
     val definition = c.elements(0).asInstanceOf[Definition]
 
-    if (c.elements(1).isInstanceOf[EmptyNode]) {
+    val (definitionSequence, fileScope) = if (c.elements(1).isInstanceOf[EmptyNode]) {
       val scope = new SymbolTable()
       scope.addSymbol(definition.name, definition.symbol)
-      DefinitionSequence(scope, List(definition))
+      (DefinitionSequence(scope, List(definition)), scope)
     }
     else {
       val sequence = c.elements(1).asInstanceOf[DefinitionSequence]
       val scope = sequence.scope
       scope.addSymbol(definition.name, definition.symbol)
-      DefinitionSequence(scope, definition +: sequence.definitions)
+      (DefinitionSequence(scope, definition +: sequence.definitions), scope)
     }
+
+    definition.scope.parent = Some(fileScope)
+    definitionSequence
   }
 
   def functionDefinition(c: Context) = {
@@ -67,11 +77,10 @@ object Fragments {
     implicit val c2 = c
     if (c.elements.length == 1 || ge(2).isInstanceOf[EmptyNode]) ge(1)
     else {
-      val callScope = new SymbolTable()
       val expression1 = co[Expression](1)
       val InfixRight(operator, expression2) = co[InfixRight](2)
-      val firstCall = FunctionApplication(callScope, BindingExpression(callScope, operator), expression1)
-      FunctionApplication(callScope, firstCall, expression2)
+      val firstCall = FunctionApplication(BindingExpression(operator), expression1)
+      FunctionApplication(firstCall, expression2)
     }
   }
 
@@ -82,17 +91,16 @@ object Fragments {
 
   def functionExpression(c: Context): ASTNode = {
     implicit val c2 = c
-
     val first = ge(1) match {
-      case literal: LiteralNode => LiteralExpression(new SymbolTable(), literal)
-      case binding: Identifier => BindingExpression(new SymbolTable(), binding)
+      case literal: LiteralNode => LiteralExpression(literal)
+      case identifier: Identifier => BindingExpression(identifier)
       case expression: Expression => expression
-      case ExpressionStatement(parentScope, expression) => expression
+      case ExpressionStatement(expression) => expression
       case n: EmptyNode => return n
     }
 
     val second = Try(ge(2)).toOption
-    if (second.isDefined && second.get.isInstanceOf[Expression]) FunctionApplication(new SymbolTable(), first, second.get.asInstanceOf[Expression])
+    if (second.isDefined && second.get.isInstanceOf[Expression]) FunctionApplication(first, second.get.asInstanceOf[Expression])
     else first
   }
 
@@ -101,21 +109,21 @@ object Fragments {
     val conditional = co[Expression](2)
     val branch1 = co[Expression](4)
     val branch2 = co[Expression](6)
-    IfExpression(new SymbolTable(), conditional, branch1, branch2)
+    IfExpression(conditional, branch1, branch2)
   }
 
   def statementSequence(c: Context): ASTNode = {
     implicit val c2 = c
 
     val first = ge(1) match {
-      case e: Expression => ExpressionStatement(e.parentScope, co[Expression](1))
+      case e: Expression => ExpressionStatement(co[Expression](1))
       case s: Statement => s
-      case SimpleContinuation(simpleArgument, continuation) => ExpressionStatement(simpleArgument.parentScope, continuation match {
+      case SimpleContinuation(simpleArgument, continuation) => ExpressionStatement(continuation match {
         case InfixRight(operator, expression) => {
-          val firstOpCall = FunctionApplication(new SymbolTable(), BindingExpression(new SymbolTable(), operator), expression)
-          FunctionApplication(new SymbolTable(), firstOpCall, simpleArgument)
+          val firstOpCall = FunctionApplication(BindingExpression(operator), expression)
+          FunctionApplication(firstOpCall, simpleArgument)
         }
-        case fa @ FunctionApplication(parentScope, function, argument) => FunctionApplication(parentScope, simpleArgument, fa)
+        case fa @ FunctionApplication(function, argument) => FunctionApplication(simpleArgument, fa)
         case EmptyNode() => simpleArgument
       })
       case EmptyNode() => return EmptyNode()
@@ -123,11 +131,20 @@ object Fragments {
 
     val second = co[ASTNode](2)
 
-    if (second.isInstanceOf[EmptyNode]) first
-    else second match {
-      case Block(scope, parentScope, statements) => Block(parentScope, scope, first +: statements)
-      case s: Statement => Block(s.parentScopeCarrier, new SymbolTable(), List(first, s))
+    val block = if (second.isInstanceOf[EmptyNode]) {
+      val blockScope = new SymbolTable()
+      ScopedExpression(blockScope, List(first))
+    } else second match {
+        case ScopedExpression(scope, statements) => ScopedExpression(scope, first +: statements)
     }
+
+    first match {
+      case Definition(scope, name, _) => scope.parent = Some(scope)
+      case ExpressionStatement(ScopedExpression(innerScope, _)) => innerScope.parent = Some(block.scope)
+      case _ => Unit
+    }
+
+    block
   }
 
   def definitionOrFE(c: Context) = {
@@ -140,29 +157,23 @@ object Fragments {
         val flhs = FLHS(co[LowerId](1), ArgumentList(co[IdList](2).ids.asInstanceOf[List[LowerId]]))
         ExtraFragments.functionDefinition(flhs, expression)
       }
-      case _: EmptyNode => {
-        val callScope = new SymbolTable()
-        ExtraFragments.callFromIds(callScope, ids.dropRight(1), BindingExpression(callScope, ids.last))
-      }
+      case _: EmptyNode => ExtraFragments.callFromIds(ids.dropRight(1), BindingExpression(ids.last))
       case InfixRight(operator, expression) => {
-        val callScope = new SymbolTable()
-        val idCall = ExtraFragments.callFromIds(callScope, ids.dropRight(1), BindingExpression(callScope, ids.last))
-        val firstOpCall = FunctionApplication(callScope, BindingExpression(new SymbolTable(), operator), expression)
-        FunctionApplication(callScope, firstOpCall, idCall)
+        val idCall = ExtraFragments.callFromIds(ids.dropRight(1), BindingExpression(ids.last))
+        val firstOpCall = FunctionApplication(BindingExpression(operator), expression)
+        FunctionApplication(firstOpCall, idCall)
       }
       case SimpleContinuation(simpleArgument, continuation) => continuation match {
         case InfixRight(operator, expression) => {
-          val callScope = new SymbolTable()
-          val call = ExtraFragments.callFromIds(callScope, ids, simpleArgument)
-          val firstOpCall = FunctionApplication(new SymbolTable(), BindingExpression(new SymbolTable(), operator), call)
-          FunctionApplication(new SymbolTable(), firstOpCall, expression)
+          val call = ExtraFragments.callFromIds(ids, simpleArgument)
+          val firstOpCall = FunctionApplication(BindingExpression(operator), call)
+          FunctionApplication(firstOpCall, expression)
         }
         case call1: FunctionApplication => {
-          val callScope = new SymbolTable()
-          val call2 = ExtraFragments.callFromIds(callScope, ids, simpleArgument)
-          FunctionApplication(callScope, call2, call1)
+          val call2 = ExtraFragments.callFromIds(ids, simpleArgument)
+          FunctionApplication(call2, call1)
         }
-        case n: EmptyNode =>ExtraFragments.callFromIds(new SymbolTable(), ids, simpleArgument)
+        case n: EmptyNode => ExtraFragments.callFromIds(ids, simpleArgument)
       }
     }
   }
@@ -172,7 +183,7 @@ object Fragments {
     if (ge(1).isInstanceOf[EmptyNode]) parsing.EmptyNode()
     else SimpleContinuation(ge(1) match {
       case e: Expression => e
-      case ExpressionStatement(parentScopeCarrier, expression) => expression // (expression already has proper scope)
+      case ExpressionStatement(expression) => expression // (expression already has proper scope)
     }, ge(2))
   }
 
@@ -184,6 +195,6 @@ object Fragments {
 
   def literalExpression(c: Context) = {
     implicit val c2 = c
-    LiteralExpression(new SymbolTable(), co[LiteralNode](1))
+    LiteralExpression(co[LiteralNode](1))
   }
 }
