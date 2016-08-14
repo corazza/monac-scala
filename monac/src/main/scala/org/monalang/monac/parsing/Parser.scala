@@ -1,7 +1,7 @@
 package org.monalang.monac.parsing
 
 import org.monalang.monac.lexing._
-import org.monalang.monac.symbol.SymbolTable
+import org.monalang.monac.symbol.Scope
 
 import scala.collection.mutable.ArrayBuffer
 import scala.reflect.ClassTag

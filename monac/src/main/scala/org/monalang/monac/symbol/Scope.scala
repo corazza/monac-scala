@@ -1,7 +1,7 @@
 package org.monalang.monac.symbol
 
-class SymbolTable() {
-  var parent: Option[SymbolTable] = None
+class Scope() {
+  var parent: Option[Scope] = None
   val lookupTable = collection.mutable.Map[String, Symbol]()
 
   def lookup(name: String): Option[Symbol] = lookupTable.get(name) match {

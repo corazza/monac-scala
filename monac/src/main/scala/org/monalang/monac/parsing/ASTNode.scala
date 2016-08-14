@@ -1,7 +1,7 @@
 package org.monalang.monac.parsing
 
 import org.monalang.monac.lexing.ValueLexeme
-import org.monalang.monac.symbol.SymbolTable
+import org.monalang.monac.symbol.Scope
 
 abstract class ASTNode
 case class EmptyNode() extends ASTNode
@@ -25,16 +25,16 @@ case class IdList(ids: List[Identifier]) extends ASTNode
 case class SimpleContinuation(simpleArgument: Expression, continuation: ASTNode) extends ASTNode
 
 
-case class DefinitionSequence(scope: SymbolTable, definitions: List[Definition]) extends ASTNode
+case class DefinitionSequence(scope: Scope, definitions: List[Definition]) extends ASTNode
 
 class Statement extends ASTNode
-case class Definition(scope: SymbolTable, name: String, symbol: org.monalang.monac.symbol.Symbol) extends Statement
+case class Definition(scope: Scope, name: String, symbol: org.monalang.monac.symbol.Symbol) extends Statement
 case class ExpressionStatement(expression: Expression) extends Statement
 
 abstract class Expression extends ASTNode
 object UnitExpression extends Expression
 case class BindingExpression(identifier: Identifier) extends Expression
 case class LiteralExpression(literal: LiteralNode) extends Expression
-case class ScopedExpression(scope: SymbolTable, statements: List[Statement]) extends Expression
+case class ScopedExpression(scope: Scope, statements: List[Statement]) extends Expression
 case class FunctionApplication(function: Expression, argument: Expression) extends Expression
 case class IfExpression(conditional: Expression, branch1: Expression, branch2: Expression) extends Expression

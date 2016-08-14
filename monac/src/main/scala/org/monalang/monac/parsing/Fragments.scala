@@ -8,7 +8,7 @@ import scala.util.Try
 object ExtraFragments {
   def functionDefinition(flhs: FLHS, expression: Expression) = {
     val symbol = ASTSymbol(expression)
-    val definitionScope = new SymbolTable()
+    val definitionScope = new Scope()
 
     for (id <- flhs.arguments.arguments)
       definitionScope.addSymbol(id.lexeme.data, ArgumentMarker())
@@ -28,6 +28,8 @@ object ExtraFragments {
       FunctionApplication(BindingExpression(id), call))
 }
 
+// TODO actually add identifiers
+
 object Fragments {
   private def co[A](i: Int)(implicit c: Context): A = c.elements(i-1).asInstanceOf[A]
   private def ge(i: Int)(implicit c: Context): ASTNode = c.elements(i-1)
@@ -40,7 +42,7 @@ object Fragments {
     val definition = c.elements(0).asInstanceOf[Definition]
 
     val (definitionSequence, fileScope) = if (c.elements(1).isInstanceOf[EmptyNode]) {
-      val scope = new SymbolTable()
+      val scope = new Scope()
       scope.addSymbol(definition.name, definition.symbol)
       (DefinitionSequence(scope, List(definition)), scope)
     }
@@ -132,7 +134,7 @@ object Fragments {
     val second = co[ASTNode](2)
 
     val block = if (second.isInstanceOf[EmptyNode]) {
-      val blockScope = new SymbolTable()
+      val blockScope = new Scope()
       ScopedExpression(blockScope, List(first))
     } else second match {
         case ScopedExpression(scope, statements) => ScopedExpression(scope, first +: statements)

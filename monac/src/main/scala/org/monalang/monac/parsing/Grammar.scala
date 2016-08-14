@@ -1,7 +1,7 @@
 package org.monalang.monac.parsing
 
 import org.monalang.monac.lexing.{OperatorId, Token}
-import org.monalang.monac.symbol.SymbolTable
+import org.monalang.monac.symbol.Scope
 
 import scala.reflect._
 import scala.collection.mutable.{ArrayBuffer, HashMap, Set}
