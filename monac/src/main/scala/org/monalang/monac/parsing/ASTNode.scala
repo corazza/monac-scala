@@ -29,6 +29,7 @@ case class DefinitionSequence(scope: Scope, definitions: List[Definition]) exten
 
 class Statement extends ASTNode
 case class Definition(scope: Scope, name: String, symbol: org.monalang.monac.symbol.Symbol) extends Statement
+case class Let(name: String, symbol: org.monalang.monac.symbol.Symbol) extends Statement
 case class ExpressionStatement(expression: Expression) extends Statement
 
 abstract class Expression extends ASTNode

@@ -54,6 +54,7 @@ object MonaGrammar extends Grammar("mona", List(
   StatementSeparatorNT  -> List(Terminal(classTag[SemiColon])) -> Fragments.emptyNode,
 
   StatementNT -> List(DefinitionOrExpressionNT) -> Fragments.extract(1),
+  StatementNT -> List(Terminal(classTag[KeywordLet]), Terminal(classTag[LowerIdToken]), Terminal(classTag[EqualsSign]), ExpressionNT) -> Fragments.letStatement,
   StatementNT -> List(SimpleExpressionNT) -> Fragments.extract(1),
 
   DefinitionOrExpressionNT -> List(DefinitionOrExpressionPrimeNT) -> Fragments.extract(1),
@@ -90,7 +91,7 @@ object ExpressionPrimeNT extends NonTerminal
 object SimpleExpressionNT extends NonTerminal
 object OperatorNT extends NonTerminal
 object StatementNT extends NonTerminal
-object StatementOtherNT extends NonTerminal
+object LetNT extends NonTerminal
 object StatementSequenceNT extends NonTerminal
 object StatementSequencePrimeNT extends NonTerminal
 object StatementSeparatorNT extends NonTerminal

@@ -57,7 +57,6 @@ object GrammarPrecompute extends App {
       case "SimpleExpressionNT" => SimpleExpressionNT
       case "OperatorNT" => OperatorNT
       case "StatementNT" => StatementNT
-      case "StatementOtherNT" => StatementOtherNT
       case "StatementSequenceNT" => StatementSequenceNT
       case "StatementSequencePrimeNT" => StatementSequencePrimeNT
       case "StatementSeparatorNT" => StatementSeparatorNT

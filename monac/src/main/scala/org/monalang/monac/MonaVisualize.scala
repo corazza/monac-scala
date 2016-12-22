@@ -4,6 +4,7 @@ import org.graphstream.graph.Node
 import org.monalang.monac.iface.CompileOptions
 import org.monalang.monac.lexing.{Lexer, SourceReader}
 import org.monalang.monac.parsing._
+import org.monalang.monac.symbol.Symbol
 import org.monalang.monac.symbol.ASTSymbol
 import org.graphstream.graph.implementations.{AbstractEdge, SingleGraph}
 import org.graphstream.ui.layout.HierarchicalLayout
@@ -47,6 +48,13 @@ object MonaVisualize extends App {
           graph.addEdge(name + child, name, child).asInstanceOf[AbstractEdge] // scala/java/graphstream bug
         }
 
+        case Let(defining, symbol) => {
+          val expression = displayNode(symbol.asInstanceOf[ASTSymbol].node, Color.exp, 0)
+          vnode.changeAttribute("ui.label", "let " + defining + " =")
+          vnode.addAttribute("ui.style", Color.ident)
+          graph.addEdge(name + expression, name, expression).asInstanceOf[AbstractEdge]
+        }
+
         case FunctionApplication(expression, argument) => {
           val childExpression = displayNode(expression, Color.call, 0)
           val childArgument = displayNode(argument, Color.exp, 0)
@@ -63,6 +71,7 @@ object MonaVisualize extends App {
           vnode.changeAttribute("ui.label", identifier.lexeme.data.toString)
           vnode.addAttribute("ui.style", Color.ident)
         }
+
         case LiteralExpression(literalNode) => {
           vnode.changeAttribute("ui.label", literalNode.lexeme.data.toString)
           vnode.addAttribute("ui.style", Color.cnst)

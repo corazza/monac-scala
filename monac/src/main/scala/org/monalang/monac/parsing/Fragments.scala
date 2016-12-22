@@ -114,6 +114,26 @@ object Fragments {
     IfExpression(conditional, branch1, branch2)
   }
 
+
+  /*
+
+  HERE
+
+  Odredi vezu između type checkinga i code emissiona
+
+
+  Treba mi let
+
+  Nema generiranja DAG-ova, niti cjelovitih AST-ova, sve se prevodi on the go.
+
+  - blocks are equivalent when their statements are equivalent
+
+  RecordStorage
+
+  - stores compiled expressions
+  - smart indexing: block / call -> length /  depth
+   */
+
   def statementSequence(c: Context): ASTNode = {
     implicit val c2 = c
 
@@ -178,6 +198,12 @@ object Fragments {
         case n: EmptyNode => ExtraFragments.callFromIds(ids, simpleArgument)
       }
     }
+  }
+
+  def letStatement(c: Context) = {
+    implicit val c2 = c
+    val symbol = ASTSymbol(co[Expression](4))
+    Let(co[LowerId](2).lexeme.data, symbol)
   }
 
   def simpleContinuation(c: Context) = {
